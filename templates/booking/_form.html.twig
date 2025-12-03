@@ -1,0 +1,82 @@
+{{ form_start(form, {'attr': {'class': 'luxury-form', 'id': 'booking-form'}}) }}
+
+<div class="form-group">
+    <label for="{{ form.quantity.vars.id }}" class="form-label">
+        <i class="fas fa-ticket-alt"></i> {{ form_label(form.quantity) }}
+    </label>
+
+    {{ form_widget(form.quantity, {
+        'attr': {
+            'class': 'form-control-luxury',
+            'min': '1',
+            'placeholder': 'Ex: 2',
+            'style': 'font-size: 1.1rem; padding: 1rem;'
+        }
+    }) }}
+
+    <div class="form-text">
+        <i class="fas fa-info-circle"></i> Prix unitaire : <strong style="color: var(--gold);">10€</strong> | Total calculé automatiquement
+    </div>
+
+    {% if form_errors(form.quantity) %}
+        <div style="color: var(--danger); margin-top: 0.5rem; font-size: 0.9rem; background: rgba(239, 68, 68, 0.1); padding: 0.5rem; border-radius: 4px; border-left: 3px solid var(--danger);">
+            <i class="fas fa-exclamation-circle"></i> {{ form_errors(form.quantity) }}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Calcul en temps réel -->
+<div id="total-display" style="
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1.5rem 0;
+    text-align: center;
+">
+    <div style="color: var(--gold-light); margin-bottom: 0.5rem;">
+        <i class="fas fa-calculator"></i> Calcul en temps réel
+    </div>
+    <div style="font-size: 1.5rem; color: var(--gold); font-weight: bold;">
+        <span id="calculated-total">0.00</span> €
+    </div>
+    <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem;">
+        <span id="quantity-display">0</span> × 10€
+    </div>
+</div>
+
+<!-- Bouton de soumission -->
+<div style="text-align: center; margin-top: 2rem;">
+    <button type="submit" class="btn-luxury" style="padding: 1rem 2rem; font-size: 1.1rem;">
+        <i class="fas fa-check-circle"></i> {{ button_label|default('Enregistrer') }}
+    </button>
+</div>
+
+{{ form_end(form) }}
+
+<!-- Script pour le calcul en temps réel -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('{{ form.quantity.vars.id }}');
+        const calculatedTotal = document.getElementById('calculated-total');
+        const quantityDisplay = document.getElementById('quantity-display');
+        const PRICE_PER_UNIT = 10;
+
+        function updateTotal() {
+            const quantity = parseInt(quantityInput.value) || 0;
+            const total = quantity * PRICE_PER_UNIT;
+
+            calculatedTotal.textContent = total.toFixed(2);
+            quantityDisplay.textContent = quantity;
+
+            // Animation
+            calculatedTotal.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                calculatedTotal.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        quantityInput.addEventListener('input', updateTotal);
+        updateTotal(); // Initial calculation
+    });
+</script>

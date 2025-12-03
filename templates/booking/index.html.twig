@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}📋 Réservations Luxueuses{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <!-- En-tête -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 class="luxury-title">
+                <i class="fas fa-list-check"></i> Mes Réservations
+            </h1>
+            <a href="{{ path('app_booking_new') }}" class="btn-luxury">
+                <i class="fas fa-plus"></i> Nouvelle Réservation
+            </a>
+        </div>
+
+        <!-- Cartes de statistiques -->
+        <div class="stats-grid">
+            {% set totalBookings = bookings|length %}
+            {% set confirmedBookings = bookings|filter(b => b.status == 'confirmed')|length %}
+            {% set cancelledBookings = bookings|filter(b => b.status == 'cancelled')|length %}
+            {% set totalRevenue = bookings|reduce((sum, b) => sum + b.total, 0) %}
+
+            <div class="stat-card">
+                <i class="fas fa-receipt" style="color: var(--gold); font-size: 1.5rem;"></i>
+                <div class="stat-value">{{ totalBookings }}</div>
+                <div class="stat-label">Total Réservations</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem;"></i>
+                <div class="stat-value">{{ confirmedBookings }}</div>
+                <div class="stat-label">Confirmées</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-times-circle" style="color: var(--danger); font-size: 1.5rem;"></i>
+                <div class="stat-value">{{ cancelledBookings }}</div>
+                <div class="stat-label">Annulées</div>
+            </div>
+
+            <div class="stat-card">
+                <i class="fas fa-euro-sign" style="color: var(--gold); font-size: 1.5rem;"></i>
+                <div class="stat-value">{{ totalRevenue|number_format(2, ',', ' ') }}€</div>
+                <div class="stat-label">Chiffre Total</div>
+            </div>
+        </div>
+
+        <!-- Liste des réservations -->
+        <div class="luxury-card" style="margin-top: 2rem;">
+            {% if bookings|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table-luxury">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Quantité</th>
+                            <th>Statut</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for booking in bookings %}
+                            <tr>
+                                <td>
+                                    <strong style="color: var(--gold);">#{{ booking.id }}</strong>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i class="fas fa-ticket-alt" style="color: var(--gold-light);"></i>
+                                        {{ booking.quantity }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if booking.status == 'confirmed' %}
+                                        <span class="badge-luxury badge-success">
+                                        <i class="fas fa-check"></i> Confirmée
+                                    </span>
+                                    {% elseif booking.status == 'cancelled' %}
+                                        <span class="badge-luxury badge-danger">
+                                        <i class="fas fa-times"></i> Annulée
+                                    </span>
+                                    {% else %}
+                                        <span class="badge-luxury badge-pending">
+                                        <i class="fas fa-clock"></i> {{ booking.status }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong style="color: var(--gold); font-size: 1.1rem;">
+                                        {{ booking.total|number_format(2, ',', ' ') }} €
+                                    </strong>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <i class="far fa-calendar" style="color: rgba(255,255,255,0.6);"></i>
+                                        {{ booking.createdAt|date('d/m/Y H:i') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <a href="{{ path('app_booking_show', {'id': booking.id}) }}"
+                                           class="btn-secondary"
+                                           style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <a href="{{ path('app_booking_edit', {'id': booking.id}) }}"
+                                           class="btn-luxury"
+                                           style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        {% if booking.status != 'cancelled' %}
+                                            <form method="post"
+                                                  action="{{ path('app_booking_cancel', {'id': booking.id}) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ booking.id) }}">
+                                                <button type="submit"
+                                                        class="btn-secondary"
+                                                        style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger);">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        <form method="post"
+                                              action="{{ path('app_booking_delete', {'id': booking.id}) }}"
+                                              style="display: inline;"
+                                              onsubmit="return confirm('Voulez-vous vraiment supprimer cette réservation ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
+                                            <button type="submit"
+                                                    class="btn-danger"
+                                                    style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.6);">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; color: rgba(255,255,255,0.2);"></i>
+                    <h3 style="color: var(--gold-light); margin-bottom: 0.5rem;">Aucune réservation</h3>
+                    <p>Commencez par créer votre première réservation !</p>
+                    <a href="{{ path('app_booking_new') }}" class="btn-luxury" style="margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> Créer une réservation
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

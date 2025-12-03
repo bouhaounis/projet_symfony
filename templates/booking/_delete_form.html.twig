@@ -1,0 +1,25 @@
+<form method="post"
+      action="{{ path('app_booking_delete', {'id': booking.id}) }}"
+      class="delete-form"
+      onsubmit="return confirmDeletion(this);">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
+    <button type="submit" class="btn-danger" style="width: 100%;">
+        <i class="fas fa-trash"></i> Supprimer définitivement
+    </button>
+</form>
+
+<script>
+    function confirmDeletion(form) {
+        if (confirm('⚠️ Cette action est irréversible !\n\nVoulez-vous vraiment supprimer cette réservation ?')) {
+            // Ajout d'un effet visuel pendant la suppression
+            const button = form.querySelector('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Suppression...';
+            button.disabled = true;
+            button.style.opacity = '0.7';
+
+            return true;
+        }
+        return false;
+    }
+</script>

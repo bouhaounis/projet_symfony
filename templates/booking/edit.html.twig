@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}✏️ Modifier Réservation #{{ booking.id }}{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-edit"></i> Modifier Réservation
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Modification de la réservation <strong style="color: var(--gold);">#{{ booking.id }}</strong>
+                    </p>
+                </div>
+
+                <!-- Carte du formulaire -->
+                <div class="luxury-card">
+                    {{ include('booking/_form.html.twig') }}
+
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <a href="{{ path('app_booking_index') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statut actuel -->
+                <div class="luxury-card" style="margin-top: 2rem; background: rgba(45, 45, 45, 0.7);">
+                    <h3 class="luxury-subtitle">
+                        <i class="fas fa-chart-line"></i> Statut actuel
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            {% if booking.status == 'confirmed' %}
+                                <span class="badge-luxury badge-success">
+                                <i class="fas fa-check"></i> Confirmée
+                            </span>
+                            {% elseif booking.status == 'cancelled' %}
+                                <span class="badge-luxury badge-danger">
+                                <i class="fas fa-times"></i> Annulée
+                            </span>
+                            {% else %}
+                                <span class="badge-luxury badge-pending">
+                                <i class="fas fa-clock"></i> {{ booking.status }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div style="color: rgba(255,255,255,0.7);">
+                            Créée le {{ booking.createdAt|date('d/m/Y à H:i') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

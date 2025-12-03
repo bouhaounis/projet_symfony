@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}✏️ Modifier Paiement #{{ payment.id }}{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 700px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-edit"></i> Modifier Paiement
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Modification du paiement <strong style="color: var(--gold);">#{{ payment.id }}</strong>
+                    </p>
+                </div>
+
+                <!-- Carte du formulaire -->
+                <div class="luxury-card">
+                    {{ include('payment/_form.html.twig') }}
+
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="btn-secondary">
+                            <i class="fas fa-eye"></i> Voir détails
+                        </a>
+                        <a href="{{ path('app_payment_index') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statut actuel -->
+                <div class="luxury-card" style="margin-top: 2rem; background: rgba(45, 45, 45, 0.7);">
+                    <h3 class="luxury-subtitle">
+                        <i class="fas fa-chart-line"></i> Statut actuel
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            {% if payment.status == 'completed' %}
+                                <span class="badge-luxury badge-success">
+                                    <i class="fas fa-check"></i> Complété
+                                </span>
+                            {% elseif payment.status == 'pending' %}
+                                <span class="badge-luxury badge-pending">
+                                    <i class="fas fa-clock"></i> En attente
+                                </span>
+                            {% elseif payment.status == 'failed' %}
+                                <span class="badge-luxury badge-danger">
+                                    <i class="fas fa-times"></i> Échoué
+                                </span>
+                            {% elseif payment.status == 'refunded' %}
+                                <span class="badge-luxury" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">
+                                    <i class="fas fa-undo"></i> Remboursé
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div style="color: rgba(255,255,255,0.7);">
+                            Créé le {{ payment.createdAt|date('d/m/Y à H:i') }}
+                        </div>
+                    </div>
+
+                    {% if payment.transactionId %}
+                        <div style="margin-top: 1rem;">
+                            <div style="color: var(--gold-light); font-size: 0.9rem;">ID Transaction</div>
+                            <div style="color: white; font-family: monospace;">{{ payment.transactionId }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

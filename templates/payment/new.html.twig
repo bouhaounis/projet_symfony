@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}✨ Nouveau Paiement{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 700px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-plus-circle"></i> Nouveau Paiement
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Créez un nouveau paiement pour une réservation
+                    </p>
+                </div>
+
+                <!-- Carte du formulaire -->
+                <div class="luxury-card">
+                    {{ include('payment/_form.html.twig') }}
+
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <a href="{{ path('app_payment_index') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Informations -->
+                <div class="luxury-card" style="margin-top: 2rem; background: rgba(212, 175, 55, 0.05);">
+                    <h3 class="luxury-subtitle">
+                        <i class="fas fa-info-circle"></i> Informations importantes
+                    </h3>
+                    <ul style="color: rgba(255,255,255,0.7); list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            <strong>Processus automatique:</strong> Les paiements "en attente" peuvent être traités
+                        </li>
+                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            <strong>Remboursement:</strong> Possible sous 30 jours pour les paiements "complétés"
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            <strong>Statut initial:</strong> <span class="badge-luxury badge-pending">En attente</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

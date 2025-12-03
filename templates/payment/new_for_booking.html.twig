@@ -1,0 +1,280 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}💳 Paiement pour Réservation #{{ booking.id }}{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-credit-card"></i> Nouveau Paiement
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Pour la réservation <strong style="color: var(--gold);">#{{ booking.id }}</strong>
+                    </p>
+                </div>
+
+                <!-- Récapitulatif Réservation -->
+                <div class="luxury-card" style="margin-bottom: 2rem;">
+                    <h3 class="luxury-subtitle">
+                        <i class="fas fa-receipt"></i> Récapitulatif de la Réservation
+                    </h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--gold);">
+                            <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-hashtag"></i> ID Réservation
+                            </div>
+                            <div style="font-size: 1.5rem; color: white; font-weight: bold;">
+                                #{{ booking.id }}
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                            <div style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-ticket-alt"></i> Quantité
+                            </div>
+                            <div style="font-size: 1.5rem; color: white; font-weight: bold;">
+                                {{ booking.quantity }} billet(s)
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--success);">
+                            <div style="color: var(--success-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-euro-sign"></i> Total Réservation
+                            </div>
+                            <div style="font-size: 1.5rem; color: var(--success); font-weight: bold;">
+                                {{ booking.total|number_format(2, ',', ' ') }} €
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--gold);">
+                            <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-wallet"></i> Reste à payer
+                            </div>
+                            <div style="font-size: 1.5rem; color: var(--gold); font-weight: bold;">
+                                {{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barre de progression -->
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--gold-light);">Progression du paiement</span>
+                            <span style="color: white; font-weight: bold;">
+                            {% set percentage = booking.total > 0 ? (booking.getTotalPaid() / booking.total * 100)|round : 0 %}
+                                {{ percentage }}%
+                        </span>
+                        </div>
+                        <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                            <div style="height: 100%; background: linear-gradient(90deg, var(--gold), #eab308); width: {{ percentage }}%; border-radius: 5px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: var(--success);">Payé: {{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €</span>
+                            <span style="color: var(--gold);">Total: {{ booking.total|number_format(2, ',', ' ') }} €</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire de paiement -->
+                <div class="luxury-card">
+                    <h3 class="luxury-subtitle" style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-credit-card"></i> Informations de Paiement
+                    </h3>
+
+                    {{ form_start(form, {'attr': {'class': 'luxury-form', 'id': 'payment-form'}}) }}
+
+                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <!-- Montant pré-rempli -->
+                        <div class="form-group">
+                            <label for="{{ form.amount.vars.id }}" class="form-label">
+                                <i class="fas fa-euro-sign"></i> {{ form_label(form.amount) }}
+                            </label>
+                            <div style="position: relative;">
+                                {{ form_widget(form.amount, {
+                                    'attr': {
+                                        'class': 'form-control-luxury',
+                                        'placeholder': 'Montant à payer',
+                                        'readonly': 'readonly',
+                                        'style': 'background: rgba(212, 175, 55, 0.1);'
+                                    }
+                                }) }}
+                                <div style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">
+                                    €
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--gold-light); margin-top: 0.5rem;">
+                                <i class="fas fa-info-circle"></i> Montant automatiquement calculé (reste à payer)
+                            </div>
+                        </div>
+
+                        <!-- Méthode de paiement -->
+                        <div class="form-group">
+                            <label for="{{ form.methode.vars.id }}" class="form-label">
+                                <i class="fas fa-credit-card"></i> {{ form_label(form.methode) }}
+                            </label>
+                            {{ form_widget(form.methode, {
+                                'attr': {
+                                    'class': 'form-control-luxury',
+                                    'style': 'padding: 1rem;'
+                                }
+                            }) }}
+                        </div>
+
+                        <!-- Statut (caché car automatique) -->
+                        <div style="display: none;">
+                            {{ form_row(form.status) }}
+                            {{ form_row(form.booking) }}
+                        </div>
+                    </div>
+
+                    <!-- Informations supplémentaires -->
+                    <div style="background: rgba(212, 175, 55, 0.05); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-shield-alt"></i> Sécurité et Conditions
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div>
+                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                    <i class="fas fa-clock"></i> Délai de traitement
+                                </div>
+                                <div style="color: white;">24-48 heures maximum</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                    <i class="fas fa-undo"></i> Politique de remboursement
+                                </div>
+                                <div style="color: white;">30 jours après paiement</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                    <i class="fas fa-lock"></i> Sécurité
+                                </div>
+                                <div style="color: white;">Paiement 100% sécurisé</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; gap: 1rem;">
+                            <a href="{{ path('app_booking_show', {'id': booking.id}) }}" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <a href="{{ path('app_payment_index') }}" class="btn-secondary">
+                                <i class="fas fa-list"></i> Tous les paiements
+                            </a>
+                        </div>
+
+                        <button type="submit" class="btn-luxury" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
+                            <i class="fas fa-check-circle"></i> Créer le paiement
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+
+                <!-- Modal d'information -->
+                <div class="luxury-card" style="margin-top: 2rem; background: rgba(59, 130, 246, 0.05);">
+                    <h3 class="luxury-subtitle" style="color: #3b82f6;">
+                        <i class="fas fa-question-circle"></i> Que se passe-t-il après ?
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
+                                <div style="width: 30px; height: 30px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-clock" style="color: #3b82f6;"></i>
+                                </div>
+                                <div style="font-weight: bold; color: white;">Étape 1</div>
+                            </div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+                                Le paiement sera créé avec le statut <span class="badge-luxury badge-pending">En attente</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
+                                <div style="width: 30px; height: 30px; background: rgba(34, 197, 94, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-play" style="color: var(--success);"></i>
+                                </div>
+                                <div style="font-weight: bold; color: white;">Étape 2</div>
+                            </div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+                                Traitez le paiement via le bouton <span style="color: var(--success);">"Traiter"</span> sur la page du paiement
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
+                                <div style="width: 30px; height: 30px; background: rgba(212, 175, 55, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-check" style="color: var(--gold);"></i>
+                                </div>
+                                <div style="font-weight: bold; color: white;">Étape 3</div>
+                            </div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
+                                Une fois traité, le statut passera à <span class="badge-luxury badge-success">Complété</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles supplémentaires -->
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--gold-light);
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .form-control-luxury {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-luxury:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-control-luxury[readonly] {
+            background: rgba(212, 175, 55, 0.1);
+            cursor: not-allowed;
+            color: var(--gold);
+        }
+
+        .luxury-form select.form-control-luxury {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+            padding-right: 3rem;
+        }
+    </style>
+{% endblock %}

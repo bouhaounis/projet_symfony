@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}✨ Nouvelle Réservation{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 600px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-plus-circle"></i> Nouvelle Réservation
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Créez une nouvelle réservation avec notre service premium
+                    </p>
+                </div>
+
+                <!-- Carte du formulaire -->
+                <div class="luxury-card">
+                    {{ include('booking/_form.html.twig') }}
+
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <a href="{{ path('app_booking_index') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Informations -->
+                <div class="luxury-card" style="margin-top: 2rem; background: rgba(212, 175, 55, 0.05);">
+                    <h3 class="luxury-subtitle">
+                        <i class="fas fa-info-circle"></i> Informations
+                    </h3>
+                    <ul style="color: rgba(255,255,255,0.7); list-style: none; padding-left: 0;">
+                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            Prix unitaire : <strong style="color: var(--gold);">10€</strong>
+                        </li>
+                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            Le total est calculé automatiquement
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                            Statut initial : <span class="badge-luxury badge-pending">En attente</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

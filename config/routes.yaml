@@ -1,0 +1,44 @@
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+app_payment_index:
+    path: /payment
+    controller: App\Controller\PaymentController::index
+    methods: GET
+
+app_payment_new:
+    path: /payment/new
+    controller: App\Controller\PaymentController::new
+    methods: [GET, POST]
+
+app_payment_new_for_booking:
+    path: /payment/new/for-booking/{bookingId}
+    controller: App\Controller\PaymentController::newForBooking
+    methods: [GET, POST]
+
+app_payment_show:
+    path: /payment/{id}
+    controller: App\Controller\PaymentController::show
+    methods: GET
+
+app_payment_edit:
+    path: /payment/{id}/edit
+    controller: App\Controller\PaymentController::edit
+    methods: [GET, POST]
+
+payment_process:
+    path: /payment/{id}/process
+    controller: App\Controller\PaymentController::processPayment
+    methods: POST
+
+payment_refund:
+    path: /payment/{id}/refund
+    controller: App\Controller\PaymentController::refundPayment
+    methods: POST
+
+app_payment_delete:
+    path: /payment/{id}
+    controller: App\Controller\PaymentController::delete
+    methods: POST

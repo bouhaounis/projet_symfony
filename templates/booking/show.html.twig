@@ -1,0 +1,287 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}📄 Réservation #{{ booking.id }}{% endblock %}
+
+{% block body %}
+    <div class="main-content">
+        <div class="luxury-container">
+            <div style="max-width: 800px; margin: 0 auto;">
+                <!-- En-tête -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 class="luxury-title">
+                        <i class="fas fa-file-invoice"></i> Détails Réservation
+                    </h1>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Informations complètes de la réservation
+                    </p>
+                </div>
+
+                <!-- Carte principale -->
+                <div class="luxury-card">
+                    <!-- En-tête de la carte -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2);">
+                        <div>
+                            <h2 style="color: var(--gold); font-size: 1.8rem; margin: 0;">
+                                Réservation #{{ booking.id }}
+                            </h2>
+                            <p style="color: rgba(255,255,255,0.6); margin: 0.25rem 0 0 0;">
+                                <i class="far fa-calendar"></i> Créée le {{ booking.createdAt|date('d/m/Y à H:i') }}
+                            </p>
+                        </div>
+
+                        <div>
+                            {% if booking.status == 'confirmed' %}
+                                <span class="badge-luxury badge-success" style="font-size: 1rem; padding: 0.5rem 1.5rem;">
+                                <i class="fas fa-check-circle"></i> Confirmée
+                            </span>
+                            {% elseif booking.status == 'cancelled' %}
+                                <span class="badge-luxury badge-danger" style="font-size: 1rem; padding: 0.5rem 1.5rem;">
+                                <i class="fas fa-times-circle"></i> Annulée
+                            </span>
+                            {% else %}
+                                <span class="badge-luxury badge-pending" style="font-size: 1rem; padding: 0.5rem 1.5rem;">
+                                <i class="fas fa-clock"></i> {{ booking.status }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Informations détaillées -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                        <!-- Section Informations -->
+                        <div>
+                            <h3 class="luxury-subtitle">
+                                <i class="fas fa-info-circle"></i> Informations
+                            </h3>
+                            <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 1.5rem;">
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        ID de réservation
+                                    </div>
+                                    <div style="font-size: 1.2rem; color: white;">
+                                        #{{ booking.id }}
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        Quantité
+                                    </div>
+                                    <div style="font-size: 1.2rem; color: white; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-ticket-alt" style="color: var(--gold);"></i>
+                                        {{ booking.quantity }} billet(s)
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        Date de création
+                                    </div>
+                                    <div style="font-size: 1.1rem; color: white; display: flex; align-items: center; gap: 10px;">
+                                        <i class="far fa-calendar" style="color: var(--gold);"></i>
+                                        {{ booking.createdAt|date('d/m/Y H:i') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section Financière -->
+                        <div>
+                            <h3 class="luxury-subtitle">
+                                <i class="fas fa-euro-sign"></i> Financier
+                            </h3>
+                            <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 1.5rem;">
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        Prix unitaire
+                                    </div>
+                                    <div style="font-size: 1.2rem; color: white;">
+                                        10.00 €
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 1rem;">
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        Total Réservation
+                                    </div>
+                                    <div style="font-size: 2rem; color: var(--gold); font-weight: bold;">
+                                        {{ booking.total|number_format(2, ',', ' ') }} €
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
+                                        Remboursement
+                                    </div>
+                                    <div style="font-size: 1.1rem; color: white;">
+                                        Jusqu'à 30 jours après paiement
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <a href="{{ path('app_booking_edit', {'id': booking.id}) }}" class="btn-luxury">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+
+                        <!-- BOUTON PAIEMENT AJOUTÉ ICI -->
+                        {% if booking.canCreatePayment() %}
+                            <a href="{{ path('app_payment_new_for_booking', {'bookingId': booking.id}) }}"
+                               class="btn-payment">
+                                <i class="fas fa-credit-card"></i> Payer maintenant
+                            </a>
+                        {% else %}
+                            <button class="btn-secondary" disabled style="opacity: 0.6;">
+                                <i class="fas fa-credit-card"></i> Paiement complet
+                            </button>
+                        {% endif %}
+
+                        {% if booking.status != 'cancelled' %}
+                            <form method="post"
+                                  action="{{ path('app_booking_cancel', {'id': booking.id}) }}"
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ booking.id) }}">
+                                <button type="submit"
+                                        class="btn-secondary"
+                                        style="background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger);">
+                                    <i class="fas fa-ban"></i> Annuler
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <form method="post"
+                              action="{{ path('app_booking_delete', {'id': booking.id}) }}"
+                              style="display: inline;"
+                              onsubmit="return confirm('Voulez-vous vraiment supprimer cette réservation ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
+                            <button type="submit"
+                                    class="btn-danger">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </form>
+
+                        <a href="{{ path('app_booking_index') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Section Paiements -->
+                {% if booking.payments|length > 0 %}
+                    <div class="luxury-card" style="margin-top: 2rem;">
+                        <h3 class="luxury-subtitle">
+                            <i class="fas fa-credit-card"></i> Historique des Paiements
+                        </h3>
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                <tr>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">ID</th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">Montant</th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">Méthode</th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">Statut</th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">Date</th>
+                                    <th style="padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1);">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for payment in booking.payments %}
+                                    <tr>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="link-gold">
+                                                #{{ payment.id }}
+                                            </a>
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <strong>{{ payment.amount|number_format(2, ',', ' ') }} €</strong>
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            {% if payment.methode == 'credit_card' %}
+                                                <span style="color: white;">
+                                                <i class="fas fa-credit-card"></i> Carte
+                                            </span>
+                                            {% elseif payment.methode == 'paypal' %}
+                                                <span style="color: white;">
+                                                <i class="fab fa-paypal"></i> PayPal
+                                            </span>
+                                            {% else %}
+                                                <span style="color: white;">
+                                                <i class="fas fa-money-bill"></i> {{ payment.methode|capitalize }}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            {% if payment.status == 'completed' %}
+                                                <span class="badge-luxury badge-success">Complété</span>
+                                            {% elseif payment.status == 'pending' %}
+                                                <span class="badge-luxury badge-pending">En attente</span>
+                                            {% elseif payment.status == 'failed' %}
+                                                <span class="badge-luxury badge-danger">Échoué</span>
+                                            {% elseif payment.status == 'refunded' %}
+                                                <span class="badge-luxury" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">
+                                                Remboursé
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            {{ payment.createdAt|date('d/m/Y H:i') }}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                            <div style="display: flex; gap: 0.5rem;">
+                                                <a href="{{ path('app_payment_show', {'id': payment.id}) }}"
+                                                   class="btn-secondary" style="padding: 0.4rem 0.6rem;">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Styles pour bouton paiement -->
+    <style>
+        .btn-payment {
+            background: linear-gradient(135deg, #d4af37, #eab308);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-payment:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+            color: #000;
+        }
+
+        .link-gold {
+            color: var(--gold);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .link-gold:hover {
+            color: #eab308;
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
