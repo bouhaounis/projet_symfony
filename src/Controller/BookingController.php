@@ -22,6 +22,20 @@ class BookingController extends AbstractController
         ]);
     }
 
+    #[Route('/cart', name: 'app_booking_cart', methods: ['GET'])]
+    public function cart(BookingRepository $bookingRepository): Response
+    {
+        $allBookings = $bookingRepository->findAll();
+        // Afficher toutes les réservations non annulées pour voir leur statut
+        $activeBookings = array_filter($allBookings, function($booking) {
+            return $booking->getStatus() !== 'cancelled';
+        });
+
+        return $this->render('booking/cart.html.twig', [
+            'bookings' => $activeBookings,
+        ]);
+    }
+
     #[Route('/new', name: 'app_booking_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -36,8 +50,8 @@ class BookingController extends AbstractController
             $entityManager->persist($booking);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Booking created successfully!');
-            return $this->redirectToRoute('app_booking_index');
+            $this->addFlash('success', 'Réservation créée avec succès !');
+            return $this->redirectToRoute('app_booking_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('booking/new.html.twig', [
@@ -63,8 +77,8 @@ class BookingController extends AbstractController
             $booking->calculateTotal();
             $entityManager->flush();
 
-            $this->addFlash('success', 'Booking updated successfully!');
-            return $this->redirectToRoute('app_booking_index');
+            $this->addFlash('success', 'Réservation modifiée avec succès !');
+            return $this->redirectToRoute('app_booking_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('booking/edit.html.twig', [
@@ -80,10 +94,10 @@ class BookingController extends AbstractController
             $booking->cancelBooking();
             $entityManager->flush();
 
-            $this->addFlash('success', 'Booking cancelled successfully!');
+            $this->addFlash('success', 'Réservation annulée avec succès !');
         }
 
-        return $this->redirectToRoute('app_booking_index');
+        return $this->redirectToRoute('app_booking_index', [], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}', name: 'app_booking_delete', methods: ['POST'])]
@@ -93,9 +107,9 @@ class BookingController extends AbstractController
             $entityManager->remove($booking);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Booking deleted successfully!');
+            $this->addFlash('success', 'Réservation supprimée avec succès !');
         }
 
-        return $this->redirectToRoute('app_booking_index');
+        return $this->redirectToRoute('app_booking_index', [], Response::HTTP_SEE_OTHER);
     }
 }

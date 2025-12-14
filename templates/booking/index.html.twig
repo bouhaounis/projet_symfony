@@ -1,156 +1,610 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}📋 Réservations Luxueuses{% endblock %}
+{% block title %}📋 Mes Réservations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Afficher les images d'événements */
+        .main-header {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        .bookings-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .bookings-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cards Grid */
+        .bookings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .booking-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .booking-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(67, 97, 238, 0.15);
+            border-color: var(--primary);
+        }
+
+        .booking-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .booking-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .booking-id-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .booking-id-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .booking-id-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .booking-status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-confirmed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .badge-pending {
+            background: rgba(255, 158, 0, 0.1);
+            color: #ff9e00;
+        }
+
+        .badge-cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .booking-details {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-value.amount {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .detail-value.success {
+            color: #22c55e;
+        }
+
+        .detail-value.danger {
+            color: #ef4444;
+        }
+
+        .booking-financial {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .financial-item {
+            text-align: center;
+        }
+
+        .financial-label {
+            font-size: 0.7rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .financial-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .financial-value.total {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .financial-value.paid {
+            color: #22c55e;
+        }
+
+        .financial-value.remaining {
+            color: #ef4444;
+        }
+
+        .booking-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-action {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .btn-primary-action {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
+
+        .btn-secondary-action {
+            background: white;
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-secondary-action:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-danger-action {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1.5px solid #ef4444;
+        }
+
+        .btn-danger-action:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-warning-action {
+            background: rgba(255, 158, 0, 0.1);
+            color: #ff9e00;
+            border: 1.5px solid #ff9e00;
+        }
+
+        .btn-warning-action:hover {
+            background: #ff9e00;
+            color: white;
+        }
+
+        .booking-date {
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 16px;
+            padding: 4rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: rgba(67, 97, 238, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .empty-text {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-create {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+
+        .action-menu {
+            position: relative;
+        }
+
+        .action-menu-btn {
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .bookings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-details {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-financial {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <div class="main-content">
-        <!-- En-tête -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1 class="luxury-title">
-                <i class="fas fa-list-check"></i> Mes Réservations
-            </h1>
-            <a href="{{ path('app_booking_new') }}" class="btn-luxury">
-                <i class="fas fa-plus"></i> Nouvelle Réservation
-            </a>
-        </div>
+    <div class="bookings-page">
+        <div class="bookings-container">
+            <!-- En-tête -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-ticket-alt"></i> Mes Réservations
+                    </h1>
+                    <p style="color: #666; margin-top: 0.5rem;">Gérez toutes vos réservations en un seul endroit</p>
+                </div>
+            </div>
 
-        <!-- Cartes de statistiques -->
-        <div class="stats-grid">
+            <!-- Statistiques -->
             {% set totalBookings = bookings|length %}
             {% set confirmedBookings = bookings|filter(b => b.status == 'confirmed')|length %}
             {% set cancelledBookings = bookings|filter(b => b.status == 'cancelled')|length %}
             {% set totalRevenue = bookings|reduce((sum, b) => sum + b.total, 0) %}
 
-            <div class="stat-card">
-                <i class="fas fa-receipt" style="color: var(--gold); font-size: 1.5rem;"></i>
-                <div class="stat-value">{{ totalBookings }}</div>
-                <div class="stat-label">Total Réservations</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-value">{{ totalBookings }}</div>
+                    <div class="stat-label">Total Réservations</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" style="color: #22c55e;">{{ confirmedBookings }}</div>
+                    <div class="stat-label">Confirmées</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-value" style="color: #ef4444;">{{ cancelledBookings }}</div>
+                    <div class="stat-label">Annulées</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-value">{{ totalRevenue|number_format(0, ',', ' ') }}€</div>
+                    <div class="stat-label">Chiffre Total</div>
+                </div>
             </div>
 
-            <div class="stat-card">
-                <i class="fas fa-check-circle" style="color: var(--success); font-size: 1.5rem;"></i>
-                <div class="stat-value">{{ confirmedBookings }}</div>
-                <div class="stat-label">Confirmées</div>
-            </div>
-
-            <div class="stat-card">
-                <i class="fas fa-times-circle" style="color: var(--danger); font-size: 1.5rem;"></i>
-                <div class="stat-value">{{ cancelledBookings }}</div>
-                <div class="stat-label">Annulées</div>
-            </div>
-
-            <div class="stat-card">
-                <i class="fas fa-euro-sign" style="color: var(--gold); font-size: 1.5rem;"></i>
-                <div class="stat-value">{{ totalRevenue|number_format(2, ',', ' ') }}€</div>
-                <div class="stat-label">Chiffre Total</div>
-            </div>
-        </div>
-
-        <!-- Liste des réservations -->
-        <div class="luxury-card" style="margin-top: 2rem;">
+            <!-- Grille de cartes -->
             {% if bookings|length > 0 %}
-                <div class="table-responsive">
-                    <table class="table-luxury">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Quantité</th>
-                            <th>Statut</th>
-                            <th>Total</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for booking in bookings %}
-                            <tr>
-                                <td>
-                                    <strong style="color: var(--gold);">#{{ booking.id }}</strong>
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <i class="fas fa-ticket-alt" style="color: var(--gold-light);"></i>
-                                        {{ booking.quantity }}
-                                    </div>
-                                </td>
-                                <td>
+                <div class="bookings-grid">
+                    {% for booking in bookings %}
+                        <div class="booking-card">
+                            <!-- En-tête de la carte -->
+                            <div class="booking-card-header">
+                                <div class="booking-id-section">
+                                    <div class="booking-id-label">Réservation</div>
+                                    <div class="booking-id-value">#{{ booking.id }}</div>
+                                </div>
+                                <div>
                                     {% if booking.status == 'confirmed' %}
-                                        <span class="badge-luxury badge-success">
-                                        <i class="fas fa-check"></i> Confirmée
-                                    </span>
+                                        <span class="booking-status-badge badge-confirmed">
+                                            <i class="fas fa-check-circle"></i> Confirmée
+                                        </span>
                                     {% elseif booking.status == 'cancelled' %}
-                                        <span class="badge-luxury badge-danger">
-                                        <i class="fas fa-times"></i> Annulée
-                                    </span>
+                                        <span class="booking-status-badge badge-cancelled">
+                                            <i class="fas fa-times-circle"></i> Annulée
+                                        </span>
                                     {% else %}
-                                        <span class="badge-luxury badge-pending">
-                                        <i class="fas fa-clock"></i> {{ booking.status }}
-                                    </span>
+                                        <span class="booking-status-badge badge-pending">
+                                            <i class="fas fa-clock"></i> {{ booking.status|capitalize }}
+                                        </span>
                                     {% endif %}
-                                </td>
-                                <td>
-                                    <strong style="color: var(--gold); font-size: 1.1rem;">
-                                        {{ booking.total|number_format(2, ',', ' ') }} €
-                                    </strong>
-                                </td>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <i class="far fa-calendar" style="color: rgba(255,255,255,0.6);"></i>
-                                        {{ booking.createdAt|date('d/m/Y H:i') }}
+                                </div>
+                            </div>
+
+                            <!-- Détails -->
+                            <div class="booking-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Quantité</div>
+                                    <div class="detail-value">
+                                        <i class="fas fa-ticket-alt" style="color: var(--primary);"></i>
+                                        {{ booking.quantity }} billet(s)
                                     </div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                        <a href="{{ path('app_booking_show', {'id': booking.id}) }}"
-                                           class="btn-secondary"
-                                           style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-
-                                        <a href="{{ path('app_booking_edit', {'id': booking.id}) }}"
-                                           class="btn-luxury"
-                                           style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-
-                                        {% if booking.status != 'cancelled' %}
-                                            <form method="post"
-                                                  action="{{ path('app_booking_cancel', {'id': booking.id}) }}"
-                                                  style="display: inline;"
-                                                  onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ booking.id) }}">
-                                                <button type="submit"
-                                                        class="btn-secondary"
-                                                        style="padding: 0.5rem 0.8rem; font-size: 0.9rem; background: rgba(239, 68, 68, 0.1); border-color: var(--danger); color: var(--danger);">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                            </form>
-                                        {% endif %}
-
-                                        <form method="post"
-                                              action="{{ path('app_booking_delete', {'id': booking.id}) }}"
-                                              style="display: inline;"
-                                              onsubmit="return confirm('Voulez-vous vraiment supprimer cette réservation ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
-                                            <button type="submit"
-                                                    class="btn-danger"
-                                                    style="padding: 0.5rem 0.8rem; font-size: 0.9rem;">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Date</div>
+                                    <div class="detail-value">
+                                        <i class="far fa-calendar" style="color: var(--gray-600);"></i>
+                                        {{ booking.createdAt|date('d/m/Y') }}
                                     </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Informations financières -->
+                            <div class="booking-financial">
+                                <div class="financial-item">
+                                    <div class="financial-label">Total</div>
+                                    <div class="financial-value total">{{ booking.total|number_format(2, ',', ' ') }} €</div>
+                                </div>
+                                <div class="financial-item">
+                                    <div class="financial-label">Payé</div>
+                                    <div class="financial-value paid">{{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €</div>
+                                </div>
+                                <div class="financial-item">
+                                    <div class="financial-label">Reste</div>
+                                    <div class="financial-value remaining">{{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €</div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="booking-actions">
+                                <a href="{{ path('app_booking_show', {'id': booking.id}) }}" class="btn-action btn-primary-action">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                                {% if booking.canCreatePayment() %}
+                                    <a href="{{ path('app_payment_new_for_booking', {'bookingId': booking.id}) }}" class="btn-action btn-primary-action">
+                                        <i class="fas fa-credit-card"></i> Payer
+                                    </a>
+                                {% else %}
+                                    <a href="{{ path('app_booking_edit', {'id': booking.id}) }}" class="btn-action btn-secondary-action">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                {% endif %}
+                                {% if booking.status != 'cancelled' %}
+                                    <form method="post" action="{{ path('app_booking_cancel', {'id': booking.id}) }}" style="display: contents;" onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ booking.id) }}">
+                                        <button type="submit" class="btn-action btn-warning-action">
+                                            <i class="fas fa-ban"></i> Annuler
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <div></div>
+                                {% endif %}
+                                <form method="post" action="{{ path('app_booking_delete', {'id': booking.id}) }}" style="display: contents;" onsubmit="return confirm('Voulez-vous vraiment supprimer cette réservation ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
+                                    <button type="submit" class="btn-action btn-danger-action">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             {% else %}
-                <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.6);">
-                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; color: rgba(255,255,255,0.2);"></i>
-                    <h3 style="color: var(--gold-light); margin-bottom: 0.5rem;">Aucune réservation</h3>
-                    <p>Commencez par créer votre première réservation !</p>
-                    <a href="{{ path('app_booking_new') }}" class="btn-luxury" style="margin-top: 1rem;">
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <h3 class="empty-title">Aucune réservation</h3>
+                    <p class="empty-text">Commencez par créer votre première réservation !</p>
+                    <a href="{{ path('app_booking_new') }}" class="btn-create">
                         <i class="fas fa-plus"></i> Créer une réservation
                     </a>
                 </div>

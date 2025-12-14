@@ -1,280 +1,685 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}💳 Paiement pour Réservation #{{ booking.id }}{% endblock %}
+{% block title %}💳 Paiement - Réservation #{{ booking.id }}{% endblock %}
 
-{% block body %}
-    <div class="main-content">
-        <div class="luxury-container">
-            <div style="max-width: 800px; margin: 0 auto;">
-                <!-- En-tête -->
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 class="luxury-title">
-                        <i class="fas fa-credit-card"></i> Nouveau Paiement
-                    </h1>
-                    <p style="color: rgba(255,255,255,0.7);">
-                        Pour la réservation <strong style="color: var(--gold);">#{{ booking.id }}</strong>
-                    </p>
-                </div>
-
-                <!-- Récapitulatif Réservation -->
-                <div class="luxury-card" style="margin-bottom: 2rem;">
-                    <h3 class="luxury-subtitle">
-                        <i class="fas fa-receipt"></i> Récapitulatif de la Réservation
-                    </h3>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--gold);">
-                            <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                <i class="fas fa-hashtag"></i> ID Réservation
-                            </div>
-                            <div style="font-size: 1.5rem; color: white; font-weight: bold;">
-                                #{{ booking.id }}
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                            <div style="color: #93c5fd; font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                <i class="fas fa-ticket-alt"></i> Quantité
-                            </div>
-                            <div style="font-size: 1.5rem; color: white; font-weight: bold;">
-                                {{ booking.quantity }} billet(s)
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--success);">
-                            <div style="color: var(--success-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                <i class="fas fa-euro-sign"></i> Total Réservation
-                            </div>
-                            <div style="font-size: 1.5rem; color: var(--success); font-weight: bold;">
-                                {{ booking.total|number_format(2, ',', ' ') }} €
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--gold);">
-                            <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.5rem;">
-                                <i class="fas fa-wallet"></i> Reste à payer
-                            </div>
-                            <div style="font-size: 1.5rem; color: var(--gold); font-weight: bold;">
-                                {{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Barre de progression -->
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span style="color: var(--gold-light);">Progression du paiement</span>
-                            <span style="color: white; font-weight: bold;">
-                            {% set percentage = booking.total > 0 ? (booking.getTotalPaid() / booking.total * 100)|round : 0 %}
-                                {{ percentage }}%
-                        </span>
-                        </div>
-                        <div style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
-                            <div style="height: 100%; background: linear-gradient(90deg, var(--gold), #eab308); width: {{ percentage }}%; border-radius: 5px;"></div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.9rem;">
-                            <span style="color: var(--success);">Payé: {{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €</span>
-                            <span style="color: var(--gold);">Total: {{ booking.total|number_format(2, ',', ' ') }} €</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Formulaire de paiement -->
-                <div class="luxury-card">
-                    <h3 class="luxury-subtitle" style="margin-bottom: 1.5rem;">
-                        <i class="fas fa-credit-card"></i> Informations de Paiement
-                    </h3>
-
-                    {{ form_start(form, {'attr': {'class': 'luxury-form', 'id': 'payment-form'}}) }}
-
-                    <div class="form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                        <!-- Montant pré-rempli -->
-                        <div class="form-group">
-                            <label for="{{ form.amount.vars.id }}" class="form-label">
-                                <i class="fas fa-euro-sign"></i> {{ form_label(form.amount) }}
-                            </label>
-                            <div style="position: relative;">
-                                {{ form_widget(form.amount, {
-                                    'attr': {
-                                        'class': 'form-control-luxury',
-                                        'placeholder': 'Montant à payer',
-                                        'readonly': 'readonly',
-                                        'style': 'background: rgba(212, 175, 55, 0.1);'
-                                    }
-                                }) }}
-                                <div style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--gold); font-weight: bold;">
-                                    €
-                                </div>
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--gold-light); margin-top: 0.5rem;">
-                                <i class="fas fa-info-circle"></i> Montant automatiquement calculé (reste à payer)
-                            </div>
-                        </div>
-
-                        <!-- Méthode de paiement -->
-                        <div class="form-group">
-                            <label for="{{ form.methode.vars.id }}" class="form-label">
-                                <i class="fas fa-credit-card"></i> {{ form_label(form.methode) }}
-                            </label>
-                            {{ form_widget(form.methode, {
-                                'attr': {
-                                    'class': 'form-control-luxury',
-                                    'style': 'padding: 1rem;'
-                                }
-                            }) }}
-                        </div>
-
-                        <!-- Statut (caché car automatique) -->
-                        <div style="display: none;">
-                            {{ form_row(form.status) }}
-                            {{ form_row(form.booking) }}
-                        </div>
-                    </div>
-
-                    <!-- Informations supplémentaires -->
-                    <div style="background: rgba(212, 175, 55, 0.05); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem;">
-                        <h4 style="color: var(--gold); margin-bottom: 1rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-shield-alt"></i> Sécurité et Conditions
-                        </h4>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                            <div>
-                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
-                                    <i class="fas fa-clock"></i> Délai de traitement
-                                </div>
-                                <div style="color: white;">24-48 heures maximum</div>
-                            </div>
-                            <div>
-                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
-                                    <i class="fas fa-undo"></i> Politique de remboursement
-                                </div>
-                                <div style="color: white;">30 jours après paiement</div>
-                            </div>
-                            <div>
-                                <div style="color: var(--gold-light); font-size: 0.9rem; margin-bottom: 0.25rem;">
-                                    <i class="fas fa-lock"></i> Sécurité
-                                </div>
-                                <div style="color: white;">Paiement 100% sécurisé</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Boutons d'action -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <div style="display: flex; gap: 1rem;">
-                            <a href="{{ path('app_booking_show', {'id': booking.id}) }}" class="btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Annuler
-                            </a>
-                            <a href="{{ path('app_payment_index') }}" class="btn-secondary">
-                                <i class="fas fa-list"></i> Tous les paiements
-                            </a>
-                        </div>
-
-                        <button type="submit" class="btn-luxury" style="padding: 1rem 2.5rem; font-size: 1.1rem;">
-                            <i class="fas fa-check-circle"></i> Créer le paiement
-                        </button>
-                    </div>
-
-                    {{ form_end(form) }}
-                </div>
-
-                <!-- Modal d'information -->
-                <div class="luxury-card" style="margin-top: 2rem; background: rgba(59, 130, 246, 0.05);">
-                    <h3 class="luxury-subtitle" style="color: #3b82f6;">
-                        <i class="fas fa-question-circle"></i> Que se passe-t-il après ?
-                    </h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
-                                <div style="width: 30px; height: 30px; background: rgba(59, 130, 246, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-clock" style="color: #3b82f6;"></i>
-                                </div>
-                                <div style="font-weight: bold; color: white;">Étape 1</div>
-                            </div>
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
-                                Le paiement sera créé avec le statut <span class="badge-luxury badge-pending">En attente</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
-                                <div style="width: 30px; height: 30px; background: rgba(34, 197, 94, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-play" style="color: var(--success);"></i>
-                                </div>
-                                <div style="font-weight: bold; color: white;">Étape 2</div>
-                            </div>
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
-                                Traitez le paiement via le bouton <span style="color: var(--success);">"Traiter"</span> sur la page du paiement
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.5rem;">
-                                <div style="width: 30px; height: 30px; background: rgba(212, 175, 55, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-check" style="color: var(--gold);"></i>
-                                </div>
-                                <div style="font-weight: bold; color: white;">Étape 3</div>
-                            </div>
-                            <div style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">
-                                Une fois traité, le statut passera à <span class="badge-luxury badge-success">Complété</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Styles supplémentaires -->
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
+        /* Masquer les images d'événements */
+        .main-header,
+        .featured-events {
+            display: none !important;
         }
 
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        .payment-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .payment-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .payment-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .payment-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-subtitle {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Payment Method Cards */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .payment-method-card {
+            background: white;
+            border: 2px solid rgba(67, 97, 238, 0.2);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .payment-method-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.2);
+        }
+
+        .payment-method-card.selected {
+            background: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), 0 10px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .payment-method-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .payment-method-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .payment-method-label {
+            color: #333;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Form Styles */
         .form-group {
             margin-bottom: 1.5rem;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: var(--gold-light);
-            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            font-weight: 600;
             font-size: 1rem;
         }
 
-        .form-control-luxury {
+        .form-control {
             width: 100%;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 8px;
-            color: white;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid rgba(67, 97, 238, 0.2);
+            border-radius: 12px;
+            color: #333;
             font-size: 1.1rem;
             transition: all 0.3s ease;
         }
 
-        .form-control-luxury:focus {
+        .form-control:focus {
             outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
-            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
         }
 
-        .form-control-luxury[readonly] {
-            background: rgba(212, 175, 55, 0.1);
+        .form-control[readonly] {
+            background: rgba(67, 97, 238, 0.05);
             cursor: not-allowed;
-            color: var(--gold);
+            color: var(--primary);
+            font-weight: 600;
         }
 
-        .luxury-form select.form-control-luxury {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23d4af37' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 16px;
-            padding-right: 3rem;
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: rgba(67, 97, 238, 0.05);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.15);
+        }
+
+        .summary-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Buttons */
+        .btn-primary-payment {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2.5rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-primary-payment:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Security Section */
+        .security-section {
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .security-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .security-item:hover .security-icon {
+            transform: scale(1.1);
+            background: rgba(67, 97, 238, 0.2);
+        }
+
+        .security-text {
+            color: #333;
+        }
+
+        .security-label {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .payment-card {
+                padding: 1.5rem;
+            }
+
+            .payment-title {
+                font-size: 2rem;
+            }
+
+            .payment-methods {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
+{% endblock %}
+
+{% block body %}
+    <div class="payment-page">
+        <div class="payment-container">
+            <div class="payment-header">
+                <h1 class="payment-title">
+                    <i class="fas fa-credit-card"></i> Finaliser le Paiement
+                </h1>
+                <p style="color: #666; font-size: 1.1rem; margin-top: 0.5rem;">
+                    Réservation #{{ booking.id }} - Complétez votre paiement en toute sécurité
+                </p>
+            </div>
+
+            <!-- Booking Summary -->
+            <div class="payment-card">
+                <h3 class="payment-subtitle">
+                    <i class="fas fa-receipt"></i> Récapitulatif
+                </h3>
+
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">
+                            <i class="fas fa-hashtag"></i> ID Réservation
+                        </div>
+                        <div class="summary-value">#{{ booking.id }}</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-label">
+                            <i class="fas fa-ticket-alt"></i> Quantité
+                        </div>
+                        <div class="summary-value">{{ booking.quantity }} billet(s)</div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-label">
+                            <i class="fas fa-euro-sign"></i> Total Réservation
+                        </div>
+                        <div class="summary-value">
+                            {{ booking.total|number_format(2, ',', ' ') }} €
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-label">
+                            <i class="fas fa-wallet"></i> Reste à payer
+                        </div>
+                        <div class="summary-value" style="color: var(--success);">
+                            {{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span>Progression du paiement</span>
+                        <span>
+                            {% set percentage = booking.total > 0 ? (booking.getTotalPaid() / booking.total * 100)|round : 0 %}
+                            {{ percentage }}%
+                        </span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ percentage }}%;"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span style="color: var(--success);">
+                            <i class="fas fa-check-circle"></i> Payé: {{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €
+                        </span>
+                        <span style="color: var(--primary);">
+                            <i class="fas fa-euro-sign"></i> Total: {{ booking.total|number_format(2, ',', ' ') }} €
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="payment-card">
+                <h3 class="payment-subtitle">
+                    <i class="fas fa-credit-card"></i> Informations de Paiement
+                </h3>
+
+                {{ form_start(form, {'attr': {'class': 'payment-form', 'id': 'payment-form'}}) }}
+
+                <!-- Amount (modifiable pour paiements partiels) -->
+                <div class="form-group">
+                    <label for="{{ form.amount.vars.id }}" class="form-label">
+                        <i class="fas fa-euro-sign"></i> Montant à payer
+                    </label>
+                    <div style="position: relative;">
+                        {{ form_widget(form.amount, {
+                            'attr': {
+                                'class': 'form-control',
+                                'style': 'font-size: 1.5rem; text-align: center;',
+                                'step': '0.01',
+                                'min': '0.01',
+                                'max': booking.getRemainingBalance(),
+                                'id': 'payment-amount-input'
+                            }
+                        }) }}
+                        <div style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: bold; font-size: 1.2rem; pointer-events: none;">
+                            €
+                        </div>
+                    </div>
+                    <small style="color: #666; margin-top: 0.5rem; display: block;">
+                        <i class="fas fa-info-circle"></i> 
+                        Montant suggéré: <strong id="suggested-amount">{{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €</strong> 
+                        (reste à payer). Vous pouvez modifier ce montant pour un paiement partiel.
+                    </small>
+                    {% if form.amount.vars.errors|length > 0 %}
+                        <div class="error-message" style="margin-top: 0.5rem;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ form_errors(form.amount) }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Payment Method Selection -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-credit-card"></i> Choisissez votre méthode de paiement
+                    </label>
+                    <div class="payment-methods" id="payment-methods">
+                        <label class="payment-method-card" data-value="credit_card">
+                            <input type="radio" name="{{ form.methode.vars.full_name }}" value="credit_card" required>
+                            <div class="payment-method-icon">💳</div>
+                            <div class="payment-method-label">Carte Bancaire</div>
+                        </label>
+                        <label class="payment-method-card" data-value="paypal">
+                            <input type="radio" name="{{ form.methode.vars.full_name }}" value="paypal" required>
+                            <div class="payment-method-icon">💰</div>
+                            <div class="payment-method-label">PayPal</div>
+                        </label>
+                        <label class="payment-method-card" data-value="cash">
+                            <input type="radio" name="{{ form.methode.vars.full_name }}" value="cash" required>
+                            <div class="payment-method-icon">💵</div>
+                            <div class="payment-method-label">Espèces</div>
+                        </label>
+                        <label class="payment-method-card" data-value="transfer">
+                            <input type="radio" name="{{ form.methode.vars.full_name }}" value="transfer" required>
+                            <div class="payment-method-icon">🏦</div>
+                            <div class="payment-method-label">Virement</div>
+                        </label>
+                    </div>
+                    {{ form_errors(form.methode) }}
+                </div>
+
+                <!-- Hidden fields -->
+                <div style="display: none;">
+                    {{ form_row(form.status) }}
+                    {{ form_row(form.booking) }}
+                    {{ form_row(form.methode) }}
+                </div>
+
+                <!-- Security Section -->
+                <div class="security-section">
+                    <h4 style="color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
+                        <i class="fas fa-shield-alt"></i> Sécurité et Conditions
+                    </h4>
+                    <div class="security-grid">
+                        <div class="security-item">
+                            <div class="security-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="security-text">
+                                <div class="security-label">Délai de traitement</div>
+                                <div>24-48 heures</div>
+                            </div>
+                        </div>
+                        <div class="security-item">
+                            <div class="security-icon">
+                                <i class="fas fa-undo"></i>
+                            </div>
+                            <div class="security-text">
+                                <div class="security-label">Remboursement</div>
+                                <div>30 jours après paiement</div>
+                            </div>
+                        </div>
+                        <div class="security-item">
+                            <div class="security-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="security-text">
+                                <div class="security-label">Sécurité</div>
+                                <div>Paiement 100% sécurisé</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment History Section -->
+                {% if booking.payments|length > 0 %}
+                    <div style="background: rgba(67, 97, 238, 0.03); border-radius: 16px; padding: 1.5rem; margin-top: 2rem; border: 1px solid rgba(67, 97, 238, 0.1);">
+                        <h4 style="color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-weight: 700;">
+                            <i class="fas fa-history"></i> Historique des Paiements
+                        </h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for payment in booking.payments %}
+                                <div style="background: white; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--primary);">
+                                    <div>
+                                        <div style="font-weight: 700; color: var(--primary); font-size: 0.9rem;">
+                                            <i class="fas fa-receipt"></i> Paiement #{{ payment.id }}
+                                        </div>
+                                        <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">
+                                            <i class="far fa-calendar"></i> {{ payment.createdAt|date('d/m/Y à H:i') }}
+                                            <span style="margin: 0 0.5rem;">•</span>
+                                            {% if payment.methode == 'credit_card' %}
+                                                <i class="fas fa-credit-card"></i> Carte
+                                            {% elseif payment.methode == 'paypal' %}
+                                                <i class="fab fa-paypal"></i> PayPal
+                                            {% else %}
+                                                <i class="fas fa-money-bill"></i> {{ payment.methode|capitalize }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);">
+                                            {{ payment.amount|number_format(2, ',', ' ') }} €
+                                        </div>
+                                        <span style="padding: 0.4rem 0.8rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; 
+                                            {% if payment.status == 'completed' %}background: rgba(34, 197, 94, 0.1); color: #22c55e;{% endif %}
+                                            {% if payment.status == 'pending' %}background: rgba(255, 158, 0, 0.1); color: #ff9e00;{% endif %}
+                                            {% if payment.status == 'failed' %}background: rgba(239, 68, 68, 0.1); color: #ef4444;{% endif %}">
+                                            {% if payment.status == 'completed' %}
+                                                <i class="fas fa-check-circle"></i> Complété
+                                            {% elseif payment.status == 'pending' %}
+                                                <i class="fas fa-clock"></i> En attente
+                                            {% elseif payment.status == 'failed' %}
+                                                <i class="fas fa-times-circle"></i> Échoué
+                                            {% else %}
+                                                {{ payment.status|capitalize }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ path('app_booking_show', {'id': booking.id}) }}" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem;">
+                            <i class="fas fa-eye"></i> Voir tous les détails de la réservation
+                        </a>
+                    </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(67, 97, 238, 0.1); flex-wrap: wrap; gap: 1rem;">
+                    <a href="{{ path('app_booking_cart') }}" class="btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour au panier
+                    </a>
+                    <button type="submit" class="btn-primary-payment">
+                        <i class="fas fa-check-circle"></i> Confirmer le paiement
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Payment method selection
+        document.querySelectorAll('.payment-method-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                document.querySelectorAll('.payment-method-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                // Check the radio button
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // Amount validation and auto-fill
+        const amountInput = document.getElementById('payment-amount-input');
+        const suggestedAmount = parseFloat('{{ booking.getRemainingBalance() }}');
+        const maxAmount = parseFloat('{{ booking.getRemainingBalance() }}');
+
+        if (amountInput) {
+            // Set max attribute
+            amountInput.setAttribute('max', maxAmount);
+            
+            // Validate amount on input
+            amountInput.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (isNaN(value)) return;
+                
+                if (value > maxAmount) {
+                    this.value = maxAmount.toFixed(2);
+                    alert('Le montant ne peut pas dépasser le solde restant de ' + maxAmount.toFixed(2) + ' €');
+                }
+                if (value < 0.01) {
+                    this.value = '0.01';
+                }
+            });
+
+            // Add button to fill suggested amount
+            const suggestedAmountText = document.getElementById('suggested-amount');
+            if (suggestedAmountText) {
+                suggestedAmountText.style.cursor = 'pointer';
+                suggestedAmountText.style.textDecoration = 'underline';
+                suggestedAmountText.title = 'Cliquez pour remplir ce montant';
+                suggestedAmountText.addEventListener('click', function() {
+                    amountInput.value = suggestedAmount.toFixed(2);
+                    amountInput.focus();
+                });
+            }
+        }
+
+        // Form validation
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            const selectedMethod = document.querySelector('input[name="{{ form.methode.vars.full_name }}"]:checked');
+            if (!selectedMethod) {
+                e.preventDefault();
+                alert('Veuillez sélectionner une méthode de paiement');
+                return false;
+            }
+
+            // Validate amount
+            const amount = parseFloat(amountInput.value);
+            if (isNaN(amount) || amount < 0.01) {
+                e.preventDefault();
+                alert('Veuillez entrer un montant valide (minimum 0.01 €)');
+                return false;
+            }
+            if (amount > maxAmount) {
+                e.preventDefault();
+                alert('Le montant ne peut pas dépasser le solde restant de ' + maxAmount.toFixed(2) + ' €');
+                return false;
+            }
+        });
+    </script>
 {% endblock %}

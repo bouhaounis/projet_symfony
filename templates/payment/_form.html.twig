@@ -1,4 +1,117 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'class': 'payment-form', 'id': 'payment-form'}}) }}
+
+<!-- Montant -->
+<div class="form-group">
+    <label for="{{ form.amount.vars.id }}" class="form-label">
+        <i class="fas fa-euro-sign"></i> Montant du paiement
+    </label>
+    <div style="position: relative;">
+        {{ form_widget(form.amount, {
+            'attr': {
+                'class': 'form-control amount-input',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0.01'
+            }
+        }) }}
+        <div style="position: absolute; right: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--primary); font-weight: bold; font-size: 1.2rem; pointer-events: none;">
+            €
+        </div>
+    </div>
+    {% if form.amount.vars.errors|length > 0 %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ form_errors(form.amount) }}
+        </div>
+    {% else %}
+        <div class="form-text">
+            <i class="fas fa-info-circle"></i>
+            Entrez le montant à payer (minimum 0.01 €)
+        </div>
+    {% endif %}
+</div>
+
+<!-- Méthode de paiement -->
+<div class="form-group">
+    <label class="form-label">
+        <i class="fas fa-credit-card"></i> Méthode de paiement
+    </label>
+    <div class="payment-methods" id="payment-methods">
+        <label class="payment-method-card" data-value="credit_card">
+            <input type="radio" name="{{ form.methode.vars.full_name }}" value="credit_card" required>
+            <div class="payment-method-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="payment-method-label">Carte Bancaire</div>
+            <div class="payment-method-desc">Visa, Mastercard, etc.</div>
+        </label>
+        <label class="payment-method-card" data-value="paypal">
+            <input type="radio" name="{{ form.methode.vars.full_name }}" value="paypal" required>
+            <div class="payment-method-icon">
+                <i class="fab fa-paypal"></i>
+            </div>
+            <div class="payment-method-label">PayPal</div>
+            <div class="payment-method-desc">Paiement sécurisé</div>
+        </label>
+        <label class="payment-method-card" data-value="cash">
+            <input type="radio" name="{{ form.methode.vars.full_name }}" value="cash" required>
+            <div class="payment-method-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="payment-method-label">Espèces</div>
+            <div class="payment-method-desc">Paiement en liquide</div>
+        </label>
+        <label class="payment-method-card" data-value="transfer">
+            <input type="radio" name="{{ form.methode.vars.full_name }}" value="transfer" required>
+            <div class="payment-method-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="payment-method-label">Virement</div>
+            <div class="payment-method-desc">Virement bancaire</div>
+        </label>
+    </div>
+    {% if form.methode.vars.errors|length > 0 %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ form_errors(form.methode) }}
+        </div>
+    {% endif %}
+    {{ form_widget(form.methode) }}
+</div>
+
+<!-- Réservation -->
+<div class="form-group">
+    <label for="{{ form.booking.vars.id }}" class="form-label">
+        <i class="fas fa-receipt"></i> Réservation associée
+    </label>
+    {{ form_widget(form.booking, {
+        'attr': {
+            'class': 'form-control booking-select'
+        }
+    }) }}
+    {% if form.booking.vars.errors|length > 0 %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
+            {{ form_errors(form.booking) }}
+        </div>
+    {% else %}
+        <div class="form-text">
+            <i class="fas fa-info-circle"></i>
+            Sélectionnez la réservation pour ce paiement
+        </div>
+    {% endif %}
+</div>
+
+<!-- Statut (caché, défini automatiquement) -->
+<div style="display: none;">
+    {{ form_widget(form.status) }}
+</div>
+
+<!-- Bouton de soumission -->
+<div class="form-actions">
+    <button type="submit" class="btn-submit">
+        <i class="fas fa-check-circle"></i> Créer le paiement
+    </button>
+</div>
+
 {{ form_end(form) }}

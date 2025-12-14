@@ -1,0 +1,378 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}👥 Gestion des Utilisateurs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        .users-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .users-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+
+        .page-subtitle {
+            color: var(--gray-600);
+            margin-top: 0.5rem;
+        }
+
+        .users-table-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .users-table-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table thead tr {
+            border-bottom: 2px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .users-table th {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--gray-50);
+        }
+
+        .users-table td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            color: var(--gray-800);
+        }
+
+        .users-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .users-table tbody tr:hover {
+            background: rgba(67, 97, 238, 0.02);
+        }
+
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-admin {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-user {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .badge-verified {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .badge-unverified {
+            background: rgba(255, 158, 0, 0.1);
+            color: #ff9e00;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.5rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-view {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-view:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-edit {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+        }
+
+        .btn-edit:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1.5px solid #ef4444;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-create {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: rgba(67, 97, 238, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .user-id {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .user-email {
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        @media (max-width: 768px) {
+            .users-table-card {
+                padding: 1rem;
+            }
+
+            .users-table {
+                font-size: 0.9rem;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="users-page">
+        <div class="users-container">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-users"></i> Gestion des Utilisateurs
+                    </h1>
+                    <p class="page-subtitle">Gérez tous les utilisateurs du système</p>
+                </div>
+                <a href="{{ path('app_user_new') }}" class="btn-create">
+                    <i class="fas fa-plus"></i> Nouvel Utilisateur
+                </a>
+            </div>
+
+            <div class="users-table-card">
+                {% if users|length > 0 %}
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Vérifié</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <span class="user-id">#{{ user.id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="user-email">{{ user.email }}</span>
+                                    </td>
+                                    <td>
+                                        {% if user.getRole() == 'admin' %}
+                                            <span class="badge badge-admin">
+                                                <i class="fas fa-shield-alt"></i> Administrateur
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-user">
+                                                <i class="fas fa-user"></i> Utilisateur
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.isVerified() %}
+                                            <span class="badge badge-verified">
+                                                <i class="fas fa-check-circle"></i> Vérifié
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-unverified">
+                                                <i class="fas fa-clock"></i> Non vérifié
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn-action btn-view">
+                                                <i class="fas fa-eye"></i> Voir
+                                            </a>
+                                            <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn-action btn-edit">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                            {% if user.id != app.user.id %}
+                                                <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" style="display: inline;" onsubmit="return confirm('Voulez-vous vraiment supprimer cet utilisateur ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                    <button type="submit" class="btn-action btn-delete">
+                                                        <i class="fas fa-trash"></i> Supprimer
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="empty-title">Aucun utilisateur</h3>
+                        <a href="{{ path('app_user_new') }}" class="btn-create" style="margin-top: 1rem;">
+                            <i class="fas fa-plus"></i> Créer un utilisateur
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

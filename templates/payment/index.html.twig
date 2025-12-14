@@ -1,155 +1,531 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}💳 Paiements{% endblock %}
+{% block title %}💳 Mes Paiements{% endblock %}
 
-{% block body %}
-    <div class="main-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1 class="luxury-title">
-                <i class="fas fa-credit-card"></i> Gestion des Paiements
-            </h1>
-            <a href="{{ path('app_payment_new') }}" class="btn-luxury">
-                <i class="fas fa-plus"></i> Nouveau Paiement
-            </a>
-        </div>
-
-        <!-- Liste des paiements -->
-        <div class="luxury-card">
-            {% if payments|length > 0 %}
-                <div class="table-responsive">
-                    <table class="table-luxury">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Montant</th>
-                            <th>Méthode</th>
-                            <th>Statut</th>
-                            <th>Réservation</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for payment in payments %}
-                            <tr>
-                                <td><strong style="color: var(--gold);">#{{ payment.id }}</strong></td>
-                                <td>
-                                    <strong style="color: white; font-size: 1.1rem;">
-                                        {{ payment.amount|number_format(2, ',', ' ') }} €
-                                    </strong>
-                                </td>
-                                <td>
-                                    {% if payment.methode == 'credit_card' %}
-                                        <span class="badge-luxury">
-                                            <i class="fas fa-credit-card"></i> Carte
-                                        </span>
-                                    {% elseif payment.methode == 'paypal' %}
-                                        <span class="badge-luxury">
-                                            <i class="fab fa-paypal"></i> PayPal
-                                        </span>
-                                    {% else %}
-                                        <span class="badge-luxury">
-                                            <i class="fas fa-money-bill"></i> {{ payment.methode|capitalize }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if payment.status == 'completed' %}
-                                        <span class="badge-luxury badge-success">
-                                            <i class="fas fa-check"></i> Complété
-                                        </span>
-                                    {% elseif payment.status == 'pending' %}
-                                        <span class="badge-luxury badge-pending">
-                                            <i class="fas fa-clock"></i> En attente
-                                        </span>
-                                    {% elseif payment.status == 'failed' %}
-                                        <span class="badge-luxury badge-danger">
-                                            <i class="fas fa-times"></i> Échoué
-                                        </span>
-                                    {% elseif payment.status == 'refunded' %}
-                                        <span class="badge-luxury" style="background: rgba(139, 92, 246, 0.2); color: #8b5cf6;">
-                                            <i class="fas fa-undo"></i> Remboursé
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if payment.booking %}
-                                        <a href="{{ path('app_booking_show', {'id': payment.booking.id}) }}" class="link-gold">
-                                            <i class="fas fa-receipt"></i> #{{ payment.booking.id }}
-                                        </a>
-                                    {% else %}
-                                        <span style="color: rgba(255,255,255,0.5);">Aucune</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <div style="color: rgba(255,255,255,0.7);">
-                                        {{ payment.createdAt|date('d/m/Y H:i') }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="display: flex; gap: 8px;">
-                                        <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="btn-secondary" style="padding: 0.5rem 0.8rem;">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-
-                                        <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" class="btn-luxury" style="padding: 0.5rem 0.8rem;">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-
-                                        {% if payment.status == 'pending' %}
-                                            <form method="post" action="{{ path('payment_process', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Traiter ce paiement ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('process' ~ payment.id) }}">
-                                                <button type="submit" class="btn-secondary" style="padding: 0.5rem 0.8rem; background: rgba(34, 197, 94, 0.1); border-color: var(--success); color: var(--success);">
-                                                    <i class="fas fa-play"></i>
-                                                </button>
-                                            </form>
-                                        {% endif %}
-
-                                        {% if payment.status == 'completed' %}
-                                            <form method="post" action="{{ path('payment_refund', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Rembourser ce paiement ?');">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('refund' ~ payment.id) }}">
-                                                <button type="submit" class="btn-secondary" style="padding: 0.5rem 0.8rem; background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; color: #8b5cf6;">
-                                                    <i class="fas fa-undo"></i>
-                                                </button>
-                                            </form>
-                                        {% endif %}
-
-                                        <form method="post" action="{{ path('app_payment_delete', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer ce paiement ?');">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ payment.id) }}">
-                                            <button type="submit" class="btn-danger" style="padding: 0.5rem 0.8rem;">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.6);">
-                    <i class="fas fa-credit-card" style="font-size: 3rem; margin-bottom: 1rem; color: rgba(255,255,255,0.2);"></i>
-                    <h3 style="color: var(--gold-light); margin-bottom: 0.5rem;">Aucun paiement</h3>
-                    <p>Créez votre premier paiement !</p>
-                    <a href="{{ path('app_payment_new') }}" class="btn-luxury" style="margin-top: 1rem;">
-                        <i class="fas fa-plus"></i> Créer un paiement
-                    </a>
-                </div>
-            {% endif %}
-        </div>
-    </div>
-
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        .link-gold {
-            color: var(--gold);
+        /* Masquer les images d'événements */
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --purple: #8b5cf6;
+        }
+
+        .payments-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .payments-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payments-table-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            overflow-x: auto;
+        }
+
+        .payments-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payments-table thead tr {
+            border-bottom: 2px solid rgba(67, 97, 238, 0.2);
+        }
+
+        .payments-table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payments-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(67, 97, 238, 0.1);
+            color: #333;
+        }
+
+        .payments-table tbody tr:hover {
+            background: rgba(67, 97, 238, 0.02);
+        }
+
+        .payment-id {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .payment-amount {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .badge-pending {
+            background: rgba(255, 158, 0, 0.1);
+            color: #ff9e00;
+        }
+
+        .badge-failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .badge-refunded {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .badge-method {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .booking-link {
+            color: var(--primary);
             text-decoration: none;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
-        .link-gold:hover {
-            color: #eab308;
+        .booking-link:hover {
+            color: var(--primary-light);
             text-decoration: underline;
         }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 0.4rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-view {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-view:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-edit {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-process {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border: 1px solid #22c55e;
+        }
+
+        .btn-process:hover {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-refund {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            border: 1px solid #8b5cf6;
+        }
+
+        .btn-refund:hover {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: rgba(67, 97, 238, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .empty-text {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn-create {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .payments-table-card {
+                padding: 1rem;
+            }
+
+            .payments-table {
+                font-size: 0.9rem;
+            }
+
+            .payments-table th,
+            .payments-table td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+            }
+        }
     </style>
+{% endblock %}
+
+{% block body %}
+    <div class="payments-page">
+        <div class="payments-container">
+            <!-- En-tête -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-credit-card"></i> Mes Paiements
+                    </h1>
+                    <p style="color: #666; margin-top: 0.5rem;">Gérez tous vos paiements en un seul endroit</p>
+                </div>
+                <a href="{{ path('app_payment_new') }}" class="btn-create">
+                    <i class="fas fa-plus"></i> Nouveau Paiement
+                </a>
+            </div>
+
+            <!-- Statistiques -->
+            {% set totalPayments = payments|length %}
+            {% set completedPayments = payments|filter(p => p.status == 'completed')|length %}
+            {% set pendingPayments = payments|filter(p => p.status == 'pending')|length %}
+            {% set totalAmount = payments|filter(p => p.status == 'completed')|reduce((sum, p) => sum + p.amount, 0) %}
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-value">{{ totalPayments }}</div>
+                    <div class="stat-label">Total Paiements</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" style="color: #22c55e;">{{ completedPayments }}</div>
+                    <div class="stat-label">Complétés</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255, 158, 0, 0.1); color: #ff9e00;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" style="color: #ff9e00;">{{ pendingPayments }}</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                    <div class="stat-value">{{ totalAmount|number_format(0, ',', ' ') }}€</div>
+                    <div class="stat-label">Montant Total</div>
+                </div>
+            </div>
+
+            <!-- Liste des paiements -->
+            <div class="payments-table-card">
+                {% if payments|length > 0 %}
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Montant</th>
+                                <th>Méthode</th>
+                                <th>Statut</th>
+                                <th>Réservation</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                                <tr>
+                                    <td>
+                                        <span class="payment-id">#{{ payment.id }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="payment-amount">{{ payment.amount|number_format(2, ',', ' ') }} €</span>
+                                    </td>
+                                    <td>
+                                        {% if payment.methode == 'credit_card' %}
+                                            <span class="badge badge-method">
+                                                <i class="fas fa-credit-card"></i> Carte
+                                            </span>
+                                        {% elseif payment.methode == 'paypal' %}
+                                            <span class="badge badge-method">
+                                                <i class="fab fa-paypal"></i> PayPal
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-method">
+                                                <i class="fas fa-money-bill"></i> {{ payment.methode|capitalize }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if payment.status == 'completed' %}
+                                            <span class="badge badge-completed">
+                                                <i class="fas fa-check-circle"></i> Complété
+                                            </span>
+                                        {% elseif payment.status == 'pending' %}
+                                            <span class="badge badge-pending">
+                                                <i class="fas fa-clock"></i> En attente
+                                            </span>
+                                        {% elseif payment.status == 'failed' %}
+                                            <span class="badge badge-failed">
+                                                <i class="fas fa-times-circle"></i> Échoué
+                                            </span>
+                                        {% elseif payment.status == 'refunded' %}
+                                            <span class="badge badge-refunded">
+                                                <i class="fas fa-undo"></i> Remboursé
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if payment.booking %}
+                                            <a href="{{ path('app_booking_show', {'id': payment.booking.id}) }}" class="booking-link">
+                                                <i class="fas fa-receipt"></i> #{{ payment.booking.id }}
+                                            </a>
+                                        {% else %}
+                                            <span style="color: #999;">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="color: #666;">
+                                        {{ payment.createdAt|date('d/m/Y à H:i') }}
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{{ path('app_payment_show', {'id': payment.id}) }}" class="btn-action btn-view">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            <a href="{{ path('app_payment_edit', {'id': payment.id}) }}" class="btn-action btn-edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+                                            {% if payment.status == 'pending' and payment.isProcessable() %}
+                                                <form method="post" action="{{ path('payment_process', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Traiter ce paiement ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('process' ~ payment.id) }}">
+                                                    <button type="submit" class="btn-action btn-process">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+
+                                            {% if payment.status == 'completed' and payment.isRefundable() %}
+                                                <form method="post" action="{{ path('payment_refund', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Rembourser ce paiement ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('refund' ~ payment.id) }}">
+                                                    <button type="submit" class="btn-action btn-refund">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+
+                                            <form method="post" action="{{ path('app_payment_delete', {'id': payment.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer ce paiement ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ payment.id) }}">
+                                                <button type="submit" class="btn-action btn-delete">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h3 class="empty-title">Aucun paiement</h3>
+                        <p class="empty-text">Créez votre premier paiement !</p>
+                        <a href="{{ path('app_payment_new') }}" class="btn-create">
+                            <i class="fas fa-plus"></i> Créer un paiement
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

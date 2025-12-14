@@ -34,12 +34,15 @@ class PaymentController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Paiement créé avec succès !');
+            if ($payment->getBooking()) {
+                return $this->redirectToRoute('app_booking_show', ['id' => $payment->getBooking()->getId()], Response::HTTP_SEE_OTHER);
+            }
             return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('payment/new.html.twig', [
             'payment' => $payment,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -52,6 +55,12 @@ class PaymentController extends AbstractController
             throw $this->createNotFoundException('Réservation non trouvée');
         }
 
+        // Vérifier si la réservation est déjà payée
+        if (!$booking->canCreatePayment()) {
+            $this->addFlash('warning', 'Cette réservation est déjà payée en totalité.');
+            return $this->redirectToRoute('app_booking_cart', [], Response::HTTP_SEE_OTHER);
+        }
+
         $payment = new Payment();
         $payment->setBooking($booking);
         $payment->setAmount($booking->getRemainingBalance());
@@ -60,17 +69,39 @@ class PaymentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifier à nouveau avant de créer le paiement
+            if (!$booking->canCreatePayment()) {
+                $this->addFlash('warning', 'Cette réservation est déjà payée en totalité.');
+                return $this->redirectToRoute('app_booking_cart', [], Response::HTTP_SEE_OTHER);
+            }
+
+            // S'assurer que le montant ne dépasse pas le solde restant
+            $remainingBalance = $booking->getRemainingBalance();
+            if ($payment->getAmount() > $remainingBalance) {
+                $payment->setAmount($remainingBalance);
+            }
+
             $entityManager->persist($payment);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Paiement créé avec succès !');
-            return $this->redirectToRoute('app_booking_show', ['id' => $bookingId]);
+            $this->addFlash('success', 'Paiement créé avec succès ! Vous pouvez créer un nouveau paiement si nécessaire.');
+            
+            // Recharger la réservation pour avoir les données à jour
+            $entityManager->refresh($booking);
+            
+            // Si il reste un solde, rediriger vers le panier pour permettre de repayer
+            if ($booking->canCreatePayment()) {
+                return $this->redirectToRoute('app_booking_cart', [], Response::HTTP_SEE_OTHER);
+            }
+            
+            // Sinon rediriger vers les détails de la réservation
+            return $this->redirectToRoute('app_booking_show', ['id' => $bookingId], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('payment/new_for_booking.html.twig', [
             'payment' => $payment,
             'booking' => $booking,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -97,7 +128,7 @@ class PaymentController extends AbstractController
 
         return $this->render('payment/edit.html.twig', [
             'payment' => $payment,
-            'form' => $form,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -106,7 +137,7 @@ class PaymentController extends AbstractController
     {
         if (!$payment->isProcessable()) {
             $this->addFlash('error', 'Ce paiement ne peut pas être traité');
-            return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()]);
+            return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()], Response::HTTP_SEE_OTHER);
         }
 
         $success = $payment->processPayment();
@@ -118,7 +149,7 @@ class PaymentController extends AbstractController
             $this->addFlash('error', '❌ Échec du traitement du paiement');
         }
 
-        return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()]);
+        return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}/refund', name: 'payment_refund', methods: ['POST'])]
@@ -126,7 +157,7 @@ class PaymentController extends AbstractController
     {
         if (!$payment->isRefundable()) {
             $this->addFlash('error', 'Ce paiement ne peut pas être remboursé');
-            return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()]);
+            return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()], Response::HTTP_SEE_OTHER);
         }
 
         $success = $payment->refund();
@@ -138,7 +169,7 @@ class PaymentController extends AbstractController
             $this->addFlash('error', '❌ Échec du remboursement');
         }
 
-        return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()]);
+        return $this->redirectToRoute('app_payment_show', ['id' => $payment->getId()], Response::HTTP_SEE_OTHER);
     }
 
     #[Route('/{id}', name: 'app_payment_delete', methods: ['POST'])]

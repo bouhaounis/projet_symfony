@@ -2,52 +2,492 @@
 
 {% block title %}✨ Nouveau Paiement{% endblock %}
 
-{% block body %}
-    <div class="main-content">
-        <div class="luxury-container">
-            <div style="max-width: 700px; margin: 0 auto;">
-                <!-- En-tête -->
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 class="luxury-title">
-                        <i class="fas fa-plus-circle"></i> Nouveau Paiement
-                    </h1>
-                    <p style="color: rgba(255,255,255,0.7);">
-                        Créez un nouveau paiement pour une réservation
-                    </p>
-                </div>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Masquer les images d'événements */
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
 
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+        }
+
+        .payment-form-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .form-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        .form-main {
+            grid-column: 1;
+        }
+
+        .form-sidebar {
+            grid-column: 2;
+        }
+
+        @media (max-width: 968px) {
+            .form-container {
+                grid-template-columns: 1fr;
+            }
+            .form-sidebar {
+                grid-column: 1;
+            }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .form-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .form-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: var(--primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            font-size: 1.1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        }
+
+        .amount-input {
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 700;
+            padding: 1.25rem 3rem 1.25rem 1.25rem;
+        }
+
+        .booking-select {
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+        }
+
+        .form-text {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-text i {
+            color: var(--primary);
+        }
+
+        .error-message {
+            color: var(--danger);
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--danger);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-message i {
+            color: var(--danger);
+        }
+
+        /* Payment Method Cards */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-method-card {
+            background: white;
+            border: 2px solid rgba(67, 97, 238, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+        }
+
+        .payment-method-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.2);
+        }
+
+        .payment-method-card.selected {
+            background: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), 0 10px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .payment-method-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .payment-method-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary);
+            display: block;
+        }
+
+        .payment-method-label {
+            color: #333;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .payment-method-desc {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .btn-submit {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(67, 97, 238, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            border-left: 4px solid var(--primary);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .quick-stats {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-stats-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .info-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: #666;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-item i {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .info-item strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .form-title {
+                font-size: 2rem;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="payment-form-page">
+        <div class="form-container">
+            <!-- En-tête -->
+            <div class="form-header">
+                <h1 class="form-title">
+                    <i class="fas fa-plus-circle"></i> Nouveau Paiement
+                </h1>
+                <p class="form-subtitle">
+                    Créez un nouveau paiement pour une réservation
+                </p>
+            </div>
+
+            <div class="form-main">
                 <!-- Carte du formulaire -->
-                <div class="luxury-card">
+                <div class="form-card">
                     {{ include('payment/_form.html.twig') }}
 
-                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <a href="{{ path('app_payment_index') }}" class="btn-secondary">
+                    <div class="form-actions">
+                        <a href="{{ path('app_payment_index') }}" class="btn-back">
                             <i class="fas fa-arrow-left"></i> Retour à la liste
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <div class="form-sidebar">
+                <!-- Statistiques rapides -->
+                <div class="quick-stats">
+                    <div class="quick-stats-title">
+                        <i class="fas fa-chart-line"></i> Informations Rapides
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Statut initial</span>
+                        <span class="stat-value">En attente</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Traitement</span>
+                        <span class="stat-value">Automatique</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Remboursement</span>
+                        <span class="stat-value">30 jours</span>
+                    </div>
+                </div>
 
                 <!-- Informations -->
-                <div class="luxury-card" style="margin-top: 2rem; background: rgba(212, 175, 55, 0.05);">
-                    <h3 class="luxury-subtitle">
+                <div class="info-card">
+                    <h3 class="info-title">
                         <i class="fas fa-info-circle"></i> Informations importantes
                     </h3>
-                    <ul style="color: rgba(255,255,255,0.7); list-style: none; padding-left: 0;">
-                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                    <ul class="info-list">
+                        <li class="info-item">
+                            <i class="fas fa-check-circle"></i>
                             <strong>Processus automatique:</strong> Les paiements "en attente" peuvent être traités
                         </li>
-                        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-check" style="color: var(--gold);"></i>
+                        <li class="info-item">
+                            <i class="fas fa-undo"></i>
                             <strong>Remboursement:</strong> Possible sous 30 jours pour les paiements "complétés"
                         </li>
-                        <li style="display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-check" style="color: var(--gold);"></i>
-                            <strong>Statut initial:</strong> <span class="badge-luxury badge-pending">En attente</span>
+                        <li class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <strong>Statut initial:</strong> <span style="background: rgba(255, 158, 0, 0.1); color: #ff9e00; padding: 0.25rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem;">En attente</span>
+                        </li>
+                        <li class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <strong>Sécurité:</strong> Tous les paiements sont sécurisés et cryptés
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Payment method selection
+        document.querySelectorAll('.payment-method-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove selected class from all cards
+                document.querySelectorAll('.payment-method-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                // Add selected class to clicked card
+                this.classList.add('selected');
+                // Check the radio button
+                this.querySelector('input[type="radio"]').checked = true;
+            });
+        });
+
+        // Form validation
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            const selectedMethod = document.querySelector('input[name="payment[methode]"]:checked');
+            if (!selectedMethod) {
+                e.preventDefault();
+                alert('Veuillez sélectionner une méthode de paiement');
+                return false;
+            }
+        });
+    </script>
 {% endblock %}

@@ -1,38 +1,368 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Payment{% endblock %}
+{% block title %}💳 Détails du Paiement #{{ payment.id }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Masquer les images d'événements */
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --purple: #8b5cf6;
+        }
+
+        .payment-detail-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .payment-detail-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .payment-detail-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .payment-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .payment-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .info-value.amount {
+            color: var(--primary);
+            font-size: 1.8rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .badge-completed {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .badge-pending {
+            background: rgba(255, 158, 0, 0.1);
+            color: #ff9e00;
+        }
+
+        .badge-failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .badge-refunded {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .payment-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(67, 97, 238, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 180px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-process {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-process:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+            color: white;
+        }
+
+        .btn-refund {
+            background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-refund:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+            color: white;
+        }
+
+        .btn-back {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .booking-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .booking-link:hover {
+            color: var(--primary-light);
+            transform: translateX(5px);
+        }
+
+        .refund-info {
+            background: rgba(139, 92, 246, 0.05);
+            border-left: 4px solid var(--purple);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .refund-info i {
+            color: var(--purple);
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .payment-detail-card {
+                padding: 1.5rem;
+            }
+
+            .payment-title {
+                font-size: 2rem;
+            }
+
+            .payment-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-actions {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Payment</h1>
+    <div class="payment-detail-page">
+        <div class="payment-detail-container">
+            <div class="payment-detail-card">
+                <div class="payment-header">
+                    <h1 class="payment-title">
+                        <i class="fas fa-credit-card"></i> Paiement #{{ payment.id }}
+                    </h1>
+                    <p class="payment-subtitle">Détails du paiement</p>
+                </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ payment.id }}</td>
-            </tr>
-            <tr>
-                <th>Amount</th>
-                <td>{{ payment.amount }}</td>
-            </tr>
-            <tr>
-                <th>Methode</th>
-                <td>{{ payment.methode }}</td>
-            </tr>
-            <tr>
-                <th>Status</th>
-                <td>{{ payment.status }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ payment.CreatedAt ? payment.CreatedAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+                <div class="payment-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-euro-sign"></i> Montant
+                        </div>
+                        <div class="info-value amount">{{ payment.amount|number_format(2, ',', ' ') }} €</div>
+                    </div>
 
-    <a href="{{ path('app_payment_index') }}">back to list</a>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-credit-card"></i> Méthode
+                        </div>
+                        <div class="info-value">
+                            {% if payment.methode == 'credit_card' %}
+                                <i class="fas fa-credit-card"></i> Carte bancaire
+                            {% elseif payment.methode == 'paypal' %}
+                                <i class="fab fa-paypal"></i> PayPal
+                            {% else %}
+                                <i class="fas fa-money-bill"></i> {{ payment.methode|capitalize }}
+                            {% endif %}
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_payment_edit', {'id': payment.id}) }}">edit</a>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-info-circle"></i> Statut
+                        </div>
+                        <div class="info-value">
+                            {% if payment.status == 'completed' %}
+                                <span class="status-badge badge-completed">
+                                    <i class="fas fa-check-circle"></i> Complété
+                                </span>
+                            {% elseif payment.status == 'pending' %}
+                                <span class="status-badge badge-pending">
+                                    <i class="fas fa-clock"></i> En attente
+                                </span>
+                            {% elseif payment.status == 'failed' %}
+                                <span class="status-badge badge-failed">
+                                    <i class="fas fa-times-circle"></i> Échoué
+                                </span>
+                            {% elseif payment.status == 'refunded' %}
+                                <span class="status-badge badge-refunded">
+                                    <i class="fas fa-undo"></i> Remboursé
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
 
-    {{ include('payment/_delete_form.html.twig') }}
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="far fa-calendar"></i> Date
+                        </div>
+                        <div class="info-value">{{ payment.createdAt|date('d/m/Y à H:i') }}</div>
+                    </div>
+                </div>
+
+                {% if payment.booking %}
+                    <div class="info-item" style="margin-bottom: 0;">
+                        <div class="info-label">
+                            <i class="fas fa-receipt"></i> Réservation associée
+                        </div>
+                        <div class="info-value">
+                            <a href="{{ path('app_booking_show', {'id': payment.booking.id}) }}" class="booking-link">
+                                <i class="fas fa-arrow-right"></i> Voir la réservation #{{ payment.booking.id }}
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="payment-actions">
+                    {% if payment.status == 'pending' and payment.isProcessable() %}
+                        <form method="post" action="{{ path('payment_process', {'id': payment.id}) }}" style="flex: 1; min-width: 180px;">
+                            <button type="submit" class="btn-action btn-process" onclick="return confirm('Voulez-vous traiter ce paiement ?');">
+                                <i class="fas fa-check-circle"></i> Traiter le paiement
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if payment.status == 'completed' and payment.isRefundable() %}
+                        <form method="post" action="{{ path('payment_refund', {'id': payment.id}) }}" style="flex: 1; min-width: 180px;">
+                            <button type="submit" class="btn-action btn-refund" onclick="return confirm('Voulez-vous vraiment rembourser ce paiement ?');">
+                                <i class="fas fa-undo"></i> Rembourser
+                            </button>
+                        </form>
+                        <div class="refund-info" style="width: 100%;">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Remboursement disponible :</strong> Ce paiement peut être remboursé dans les 30 jours suivant la date de paiement.
+                        </div>
+                    {% elseif payment.status == 'completed' and not payment.isRefundable() %}
+                        <div class="refund-info" style="width: 100%;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Remboursement non disponible :</strong> Le délai de remboursement de 30 jours a expiré.
+                        </div>
+                    {% endif %}
+
+                    <a href="{{ path('app_payment_index') }}" class="btn-action btn-back">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
