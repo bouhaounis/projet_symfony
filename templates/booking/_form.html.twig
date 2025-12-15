@@ -15,7 +15,12 @@
     }) }}
 
     <div class="form-text">
-        <i class="fas fa-info-circle"></i> Prix unitaire : <strong style="color: var(--gold);">10€</strong> | Total calculé automatiquement
+        <i class="fas fa-info-circle"></i>
+        Prix unitaire :
+        <strong style="color: var(--gold);">
+            {% if event is defined %}{{ event.prix }}€{% else %}—{% endif %}
+        </strong>
+        | Total calculé automatiquement
     </div>
 
     {% if form_errors(form.quantity) %}
@@ -41,7 +46,11 @@
         <span id="calculated-total">0.00</span> €
     </div>
     <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem;">
-        <span id="quantity-display">0</span> × 10€
+        <span id="quantity-display">0</span>
+        ×
+        <span id="unit-price-display">
+            {% if event is defined %}{{ event.prix }}{% else %}0{% endif %}
+        </span>€
     </div>
 </div>
 
@@ -60,7 +69,8 @@
         const quantityInput = document.getElementById('{{ form.quantity.vars.id }}');
         const calculatedTotal = document.getElementById('calculated-total');
         const quantityDisplay = document.getElementById('quantity-display');
-        const PRICE_PER_UNIT = 10;
+        const unitPriceDisplay = document.getElementById('unit-price-display');
+        const PRICE_PER_UNIT = parseFloat(unitPriceDisplay.textContent.replace(',', '.')) || 0;
 
         function updateTotal() {
             const quantity = parseInt(quantityInput.value) || 0;
@@ -69,7 +79,6 @@
             calculatedTotal.textContent = total.toFixed(2);
             quantityDisplay.textContent = quantity;
 
-            // Animation
             calculatedTotal.style.transform = 'scale(1.1)';
             setTimeout(() => {
                 calculatedTotal.style.transform = 'scale(1)';
@@ -77,6 +86,6 @@
         }
 
         quantityInput.addEventListener('input', updateTotal);
-        updateTotal(); // Initial calculation
+        updateTotal();
     });
 </script>

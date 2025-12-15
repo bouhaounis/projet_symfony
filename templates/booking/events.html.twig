@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🎉 Événements disponibles{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Masquer le header et les événements en vedette de la home pour éviter la répétition */
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+        .events-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+        
+        .page-subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-badge-soldout {
+            position: absolute;
+            top: 12px;
+            left: -40px;
+            background: #dc2626;
+            color: #fff;
+            padding: 0.3rem 1.8rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            transform: rotate(-20deg);
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4);
+        }
+        
+        .event-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .event-content {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .event-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        
+        .event-date {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .event-description {
+            color: #4a5568;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+        
+        .event-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #edf2f7;
+        }
+        
+        .event-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .event-capacity {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+        
+        .btn-book {
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.6rem 1.4rem;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+        }
+
+        .btn-book-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-book-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.3);
+            color: #fff;
+        }
+
+        .btn-book-secondary {
+            background: #fff;
+            color: #374151;
+            border-color: #d1d5db;
+        }
+
+        .btn-book-secondary:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-text {
+            color: #718096;
+            max-width: 500px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="events-container">
+        <div class="page-header">
+            <h1 class="page-title">🎉 Événements disponibles</h1>
+            <p class="page-subtitle">Découvrez nos prochains événements et réservez votre place dès maintenant !</p>
+        </div>
+        
+        {% if events|length > 0 %}
+            <div class="events-grid">
+                {% for event in events %}
+                    {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+                    <div class="event-card" style="position: relative;">
+                        {% if event.soldOut %}
+                            <div class="event-badge-soldout">Complet</div>
+                        {% endif %}
+                        {% if event.image %}
+                            <img src="{{ imageSrc }}" alt="{{ event.nom }}" class="event-image" loading="lazy">
+                        {% else %}
+                            <div class="event-image" style="background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%); display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">
+                                {{ event.nom }}
+                            </div>
+                        {% endif %}
+                        <div class="event-content">
+                            <h3 class="event-title">{{ event.nom }}</h3>
+                            <div class="event-date">
+                                <i class="far fa-calendar-alt me-1"></i> {{ event.dateEvent|date('d/m/Y') }}
+                            </div>
+                            <p class="event-description">
+                                {{ event.description|length > 150 ? event.description|slice(0, 150) ~ '...' : event.description }}
+                            </p>
+                            <div class="event-details">
+                                <div>
+                                    <div class="event-price">{{ event.prix }} €</div>
+                                    <div class="event-capacity">
+                                        {% if event.soldOut %}
+                                            <span style="color:#dc2626; font-weight:700;">Complet</span>
+                                        {% else %}
+                                            {{ event.getRemainingCapacity() }} / {{ event.capacity }} places
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap: .5rem; flex-wrap: wrap;">
+                                    <a href="{{ path('app_booking_event_show', {'id': event.id}) }}" class="btn-book btn-book-secondary">
+                                        Voir les détails
+                                    </a>
+                                    {% if not event.soldOut %}
+                                        <a href="{{ path('app_booking_new', {'id': event.id}) }}" class="btn-book btn-book-primary">
+                                            Réserver <i class="fas fa-arrow-right ms-2" style="margin-left: .4rem;"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <h3 class="empty-title">Aucun événement disponible</h3>
+                <p class="empty-text">Il n'y a pas d'événements disponibles pour le moment. Revenez plus tard pour découvrir nos prochains événements !</p>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_event_new') }}" class="btn-book">
+                        <i class="fas fa-plus me-2"></i> Créer un événement
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

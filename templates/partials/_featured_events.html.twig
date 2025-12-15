@@ -1,0 +1,31 @@
+{% if events is not empty %}
+    <div class="featured-events">
+        {% for event in events %}
+            {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+            <div class="event-card">
+                {% if event.image %}
+                    <img class="event-image" src="{{ imageSrc }}" alt="{{ event.nom }}">
+                {% else %}
+                    <div class="event-image" style="background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%); display:flex;align-items:center;justify-content:center;color:white;font-weight:700;">
+                        {{ event.nom }}
+                    </div>
+                {% endif %}
+                <div class="event-content">
+                    <h4>{{ event.nom }}</h4>
+                    <p>
+                        <i class="far fa-calendar-alt"></i>
+                        {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : 'Date à venir' }}
+                    </p>
+                    <p style="margin: 0; color:#4b5563;">
+                        {{ event.description ? event.description|slice(0,80) ~ (event.description|length > 80 ? '…' : '') : 'Aucune description' }}
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="featured-events" style="text-align:center; padding:1rem;">
+        <p>Aucun événement pour le moment.</p>
+    </div>
+{% endif %}
+

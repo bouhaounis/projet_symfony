@@ -343,6 +343,35 @@
             </div>
 
             <div class="form-sidebar">
+                {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+                <div class="info-card" style="margin-bottom: 1.5rem;">
+                    <h3 class="info-title">
+                        <i class="fas fa-calendar-check"></i> Événement sélectionné
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        {% if event.image %}
+                            <img src="{{ imageSrc }}" alt="{{ event.nom }}" style="width: 100%; border-radius: 12px; object-fit: cover; max-height: 180px;">
+                        {% else %}
+                            <div style="width: 100%; height: 180px; border-radius: 12px; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%); color: white; font-weight: 700;">
+                                {{ event.nom }}
+                            </div>
+                        {% endif %}
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--primary);">{{ event.nom }}</div>
+                        <div style="color: #666; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="far fa-calendar-alt"></i>
+                            {{ event.dateEvent|date('d/m/Y') }}
+                        </div>
+                        <div style="color: #666; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-euro-sign"></i>
+                            {{ event.prix }} €
+                        </div>
+                        <div style="color: #666; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-users"></i>
+                            {{ event.capacity }} places
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Statistiques rapides -->
                 <div class="quick-stats">
                     <div class="quick-stats-title">
@@ -350,7 +379,7 @@
                     </div>
                     <div class="stat-row">
                         <span class="stat-label">Prix unitaire</span>
-                        <span class="stat-value">10.00 €</span>
+                        <span class="stat-value">{{ event.prix }} €</span>
                     </div>
                     <div class="stat-row">
                         <span class="stat-label">Calcul</span>
@@ -370,7 +399,7 @@
                     <ul class="info-list">
                         <li class="info-item">
                             <i class="fas fa-check-circle"></i>
-                            <strong>Prix unitaire:</strong> 10€ par billet
+                            <strong>Prix unitaire:</strong> {{ event.prix }}€ par billet
                         </li>
                         <li class="info-item">
                             <i class="fas fa-calculator"></i>

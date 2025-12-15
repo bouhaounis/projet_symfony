@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\PaymentRepository;
+use App\Entity\Ticket;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PaymentRepository::class)]
@@ -29,9 +32,13 @@ class Payment
     #[ORM\JoinColumn(nullable: false)]
     private ?Booking $booking = null;
 
+    #[ORM\OneToMany(mappedBy: 'payment', targetEntity: Ticket::class, cascade: ['persist'])]
+    private Collection $tickets;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->tickets = new ArrayCollection();
     }
 
     public function processPayment(): bool
@@ -154,6 +161,35 @@ class Payment
     public function setBooking(?Booking $booking): static
     {
         $this->booking = $booking;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setPayment($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            if ($ticket->getPayment() === $this) {
+                $ticket->setPayment(null);
+            }
+        }
+
         return $this;
     }
 }

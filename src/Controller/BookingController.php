@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Booking;
+use App\Entity\Ticket;
 use App\Form\BookingType;
 use App\Repository\BookingRepository;
+use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +17,15 @@ use Symfony\Component\Routing\Annotation\Route;
 class BookingController extends AbstractController
 {
     #[Route('/', name: 'app_booking_index', methods: ['GET'])]
-    public function index(BookingRepository $bookingRepository): Response
+    public function index(EventRepository $eventRepository): Response
+    {
+        return $this->render('booking/events.html.twig', [
+            'events' => $eventRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/reservations', name: 'app_booking_reservations', methods: ['GET'])]
+    public function reservations(BookingRepository $bookingRepository): Response
     {
         return $this->render('booking/index.html.twig', [
             'bookings' => $bookingRepository->findAll(),
@@ -36,16 +46,65 @@ class BookingController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_booking_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/events', name: 'app_booking_events', methods: ['GET'])]
+    public function events(EventRepository $eventRepository): Response
     {
+        return $this->render('booking/events.html.twig', [
+            'events' => $eventRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/events/{id}', name: 'app_booking_event_show', methods: ['GET'])]
+    public function eventShow(int $id, EventRepository $eventRepository): Response
+    {
+        $event = $eventRepository->find($id);
+
+        if (!$event) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        return $this->render('booking/event_show.html.twig', [
+            'event' => $event,
+        ]);
+    }
+
+    #[Route('/new', name: 'app_booking_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, EventRepository $eventRepository): Response
+    {
+        $eventId = $request->query->getInt('id');
+        $event = $eventId ? $eventRepository->find($eventId) : null;
+
+        if (!$event) {
+            $this->addFlash('warning', 'Veuillez sélectionner un événement à réserver.');
+            return $this->redirectToRoute('app_booking_events');
+        }
+
         $booking = new Booking();
+        $booking->setEvent($event);
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$event->checkAvailability($booking->getQuantity() ?? 0)) {
+                $this->addFlash('error', 'Plus de places disponibles pour cette quantité pour cet événement.');
+                return $this->redirectToRoute('app_booking_events');
+            }
+
             $booking->createBooking();
             $booking->calculateTotal();
+
+            // Générer les tickets (1 par place) liés au user courant
+            $user = $this->getUser();
+            if ($user) {
+                for ($i = 0; $i < ($booking->getQuantity() ?? 0); $i++) {
+                    $ticket = new Ticket();
+                    $ticket->setSeat('S-' . ($i + 1));
+                    $ticket->setUser($user);
+                    $ticket->setBooking($booking);
+                    $ticket->generateTicket();
+                    $booking->addTicket($ticket);
+                }
+            }
 
             $entityManager->persist($booking);
             $entityManager->flush();
@@ -56,6 +115,7 @@ class BookingController extends AbstractController
 
         return $this->render('booking/new.html.twig', [
             'form' => $form->createView(),
+            'event' => $event,
         ]);
     }
 

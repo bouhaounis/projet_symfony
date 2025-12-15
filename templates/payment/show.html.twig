@@ -341,21 +341,40 @@
                         </form>
                     {% endif %}
 
-                    {% if payment.status == 'completed' and payment.isRefundable() %}
-                        <form method="post" action="{{ path('payment_refund', {'id': payment.id}) }}" style="flex: 1; min-width: 180px;">
-                            <button type="submit" class="btn-action btn-refund" onclick="return confirm('Voulez-vous vraiment rembourser ce paiement ?');">
-                                <i class="fas fa-undo"></i> Rembourser
-                            </button>
-                        </form>
-                        <div class="refund-info" style="width: 100%;">
-                            <i class="fas fa-info-circle"></i>
-                            <strong>Remboursement disponible :</strong> Ce paiement peut être remboursé dans les 30 jours suivant la date de paiement.
-                        </div>
-                    {% elseif payment.status == 'completed' and not payment.isRefundable() %}
-                        <div class="refund-info" style="width: 100%;">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <strong>Remboursement non disponible :</strong> Le délai de remboursement de 30 jours a expiré.
-                        </div>
+                    {% if payment.status == 'completed' %}
+                        {# Nouveau bouton : récupérer les tickets quand le paiement est complété #}
+                        {% if payment.booking and payment.booking.tickets is defined and payment.booking.tickets|length > 0 %}
+                            <div style="flex: 1; min-width: 180px;">
+                                {% for ticket in payment.booking.tickets %}
+                                    <a href="{{ path('app_ticket_pdf', {'id': ticket.id}) }}"
+                                       class="btn-action btn-process"
+                                       style="margin-bottom: .5rem; display:inline-flex; width:100%; justify-content:center;"
+                                       target="_blank">
+                                        <i class="fas fa-ticket-alt"></i>
+                                        Obtenir mon ticket #{{ ticket.id }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if payment.isRefundable() %}
+                            <form method="post" action="{{ path('payment_refund', {'id': payment.id}) }}" style="flex: 1; min-width: 180px;">
+                                <button type="submit" class="btn-action btn-refund" onclick="return confirm('Voulez-vous vraiment rembourser ce paiement ?');">
+                                    <i class="fas fa-undo"></i> Rembourser
+                                </button>
+                            </form>
+                            <div class="refund-info" style="width: 100%;">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Remboursement disponible :</strong> Ce paiement peut être remboursé dans les 30 jours suivant la date de paiement.
+                            </div>
+                        {% else %}
+                            {% if payment.status == 'completed' and not payment.isRefundable() %}
+                                <div class="refund-info" style="width: 100%;">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <strong>Remboursement non disponible :</strong> Le délai de remboursement de 30 jours a expiré.
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
 
                     <a href="{{ path('app_payment_index') }}" class="btn-action btn-back">

@@ -219,6 +219,17 @@
                             </div>
                         </div>
                         <div class="info-box">
+                            <div class="info-label">Disponibilité</div>
+                            <div class="info-value">
+                                <i class="fas fa-ticket-alt"></i>
+                                {% if event.soldOut %}
+                                    <span style="color:#dc2626; font-weight:700;">Complet</span>
+                                {% else %}
+                                    {{ event.getRemainingCapacity() }} / {{ event.capacity }} places restantes
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="info-box">
                             <div class="info-label">Prix</div>
                             <div class="info-value price">
                                 <i class="fas fa-euro-sign"></i>

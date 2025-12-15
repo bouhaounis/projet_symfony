@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\BookingRepository;
+use App\Entity\Event;
+use App\Entity\Ticket;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -24,17 +26,25 @@ class Booking
     #[ORM\Column]
     private ?float $total = null;
 
+    #[ORM\ManyToOne(inversedBy: 'bookings')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Event $event = null;
+
     #[ORM\Column]
     private ?\DateTime $createdAt = null;
 
     #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'booking', cascade: ['persist', 'remove'])]
     private Collection $payments;
 
+    #[ORM\OneToMany(mappedBy: 'booking', targetEntity: Ticket::class, cascade: ['persist', 'remove'])]
+    private Collection $tickets;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
         $this->status = 'pending';
         $this->payments = new ArrayCollection();
+        $this->tickets = new ArrayCollection();
         $this->calculateTotal();
     }
 
@@ -58,8 +68,9 @@ class Booking
 
     public function calculateTotal(): float
     {
-        $pricePerUnit = 10.0;
-        $this->total = $this->quantity * $pricePerUnit;
+        $pricePerUnit = $this->event?->getPrix() ?? 10.0;
+        $quantity = $this->quantity ?? 0;
+        $this->total = $quantity * $pricePerUnit;
         return $this->total;
     }
 
@@ -174,6 +185,47 @@ class Booking
                 $payment->setBooking(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ticket>
+     */
+    public function getTickets(): Collection
+    {
+        return $this->tickets;
+    }
+
+    public function addTicket(Ticket $ticket): static
+    {
+        if (!$this->tickets->contains($ticket)) {
+            $this->tickets->add($ticket);
+            $ticket->setBooking($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTicket(Ticket $ticket): static
+    {
+        if ($this->tickets->removeElement($ticket)) {
+            if ($ticket->getBooking() === $this) {
+                $ticket->setBooking(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getEvent(): ?Event
+    {
+        return $this->event;
+    }
+
+    public function setEvent(?Event $event): static
+    {
+        $this->event = $event;
 
         return $this;
     }

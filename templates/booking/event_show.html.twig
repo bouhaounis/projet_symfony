@@ -1,0 +1,228 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de l'événement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Cacher le header/hero global pour que seule l'image de l'événement soit mise en avant */
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        .event-detail-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 3.5rem;
+        }
+
+        .event-detail-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .event-detail-header {
+            position: relative;
+            height: 420px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .event-detail-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.1));
+        }
+
+        .event-detail-header-inner {
+            position: relative;
+            padding: 2rem 2.25rem;
+            width: 100%;
+            color: #f9fafb;
+        }
+
+        .event-detail-header-title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-detail-header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .event-detail-content {
+            padding: 2.25rem 2.5rem 2.25rem;
+        }
+
+        .event-detail-description {
+            color: #374151;
+            line-height: 1.9;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+            max-width: 80ch;
+        }
+
+        .event-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .event-detail-stat {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .event-detail-stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-detail-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .event-detail-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.4rem;
+            border-radius: 999px;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #374151;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .btn-book-primary {
+            border-radius: 999px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            padding: 0.75rem 1.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+            transition: all 0.25s ease;
+        }
+
+        .btn-book-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45);
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .event-detail-content {
+                padding: 1.75rem 1.5rem;
+            }
+            .event-detail-header-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="event-detail-wrapper">
+    <a href="{{ path('app_booking_index') }}" class="btn-back" style="margin-bottom: 1rem;">
+        <i class="fas fa-arrow-left"></i> Retour aux événements
+    </a>
+
+    <div class="event-detail-card">
+        {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+
+        <div class="event-detail-header"
+             style="{% if event.image %}background-image: url('{{ imageSrc }}');{% else %}background-image: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);{% endif %}">
+            <div class="event-detail-header-inner">
+                <div class="event-detail-header-title">{{ event.nom }}</div>
+                <div class="event-detail-header-meta">
+                    <span><i class="far fa-calendar-alt"></i> {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : 'Date à venir' }}</span>
+                    <span><i class="fas fa-euro-sign"></i> {{ event.prix }} €</span>
+                    <span><i class="fas fa-users"></i>
+                        {% if event.soldOut %}
+                            Complet
+                        {% else %}
+                            {{ event.getRemainingCapacity() }} / {{ event.capacity }} places
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="event-detail-content">
+
+            <p class="event-detail-description">
+                {{ event.description ?: 'Aucune description fournie.' }}
+            </p>
+
+            <div class="event-detail-grid">
+                <div class="event-detail-stat">
+                    <div class="event-detail-stat-label">Prix</div>
+                    <div class="event-detail-stat-value">{{ event.prix }} €</div>
+                </div>
+                <div class="event-detail-stat">
+                    <div class="event-detail-stat-label">Places restantes</div>
+                    <div class="event-detail-stat-value">
+                        {% if event.soldOut %}
+                            Complet
+                        {% else %}
+                            {{ event.getRemainingCapacity() }} / {{ event.capacity }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-detail-actions">
+                {% if not event.soldOut %}
+                    <a href="{{ path('app_booking_new', {'id': event.id}) }}" class="btn-book btn-book-primary">
+                        Réserver <i class="fas fa-arrow-right ms-2" style="margin-left: .4rem;"></i>
+                    </a>
+                {% else %}
+                    <span style="font-weight:700; color:#dc2626;">Complet - plus de réservation possible</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

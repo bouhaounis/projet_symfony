@@ -77,6 +77,41 @@
             background: var(--gradient-primary);
         }
 
+        .booking-event-hero {
+            margin: -2.5rem -2.5rem 2rem;
+            height: 260px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .booking-event-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.15));
+        }
+
+        .booking-event-hero-inner {
+            position: relative;
+            height: 100%;
+            padding: 1.5rem 2.5rem;
+            display: flex;
+            align-items: flex-end;
+            color: #f9fafb;
+        }
+
+        .booking-event-hero-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .booking-event-hero-meta {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
         .booking-header {
             display: flex;
             justify-content: space-between;
@@ -443,6 +478,22 @@
 
             <!-- Carte principale -->
             <div class="booking-card">
+                {% if booking.event %}
+                    {% set imageSrc = (booking.event.image starts with 'http') ? booking.event.image : app.request.basePath ~ '/uploads/events/' ~ booking.event.image %}
+                    <div class="booking-event-hero" style="background-image: url('{{ imageSrc }}');">
+                        <div class="booking-event-hero-inner">
+                            <div>
+                                <div class="booking-event-hero-title">{{ booking.event.nom }}</div>
+                                <div class="booking-event-hero-meta">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ booking.event.dateEvent ? booking.event.dateEvent|date('d/m/Y') : 'Date à venir' }}
+                                    &nbsp;•&nbsp;
+                                    <i class="fas fa-euro-sign"></i> {{ booking.event.prix }} €
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
                 <!-- En-tête de la carte -->
                 <div class="booking-header">
                     <div class="booking-id-section">
@@ -477,6 +528,20 @@
                         </div>
                         <div class="info-box">
                             <div class="info-item">
+                                <div class="info-label">Événement</div>
+                                <div class="info-value">
+                                    <i class="fas fa-music" style="color: var(--primary);"></i>
+                                    {{ booking.event ? booking.event.nom : 'Non renseigné' }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Date de l'événement</div>
+                                <div class="info-value">
+                                    <i class="far fa-calendar-check" style="color: var(--gray-600);"></i>
+                                    {{ booking.event ? booking.event.dateEvent|date('d/m/Y') : 'N/A' }}
+                                </div>
+                            </div>
+                            <div class="info-item">
                                 <div class="info-label">Quantité de billets</div>
                                 <div class="info-value">
                                     <i class="fas fa-ticket-alt" style="color: var(--primary);"></i>
@@ -485,7 +550,9 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Prix unitaire</div>
-                                <div class="info-value">10.00 €</div>
+                                <div class="info-value">
+                                    {{ booking.event ? booking.event.prix|number_format(2, ',', ' ') : booking.total / (booking.quantity ?: 1)|number_format(2, ',', ' ') }} €
+                                </div>
                             </div>
                         </div>
                     </div>

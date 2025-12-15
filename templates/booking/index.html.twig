@@ -5,8 +5,9 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        /* Afficher les images d'événements */
-        .main-header {
+        /* Cacher le header/hero et les événements vedettes sur la page Mes Réservations */
+        .main-header,
+        .featured-events {
             display: none !important;
         }
 
@@ -208,9 +209,32 @@
         .booking-details {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            grid-template-columns: 180px 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .booking-event-image {
+            width: 180px;
+            height: 110px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.25);
+        }
+
+        .booking-event-image-fallback {
+            width: 180px;
+            height: 110px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.25);
         }
 
         .detail-item {
@@ -531,6 +555,30 @@
 
                             <!-- Détails -->
                             <div class="booking-details">
+                                <div>
+                                    {% if booking.event %}
+                                        {% set imageSrc = (booking.event.image starts with 'http') ? booking.event.image : app.request.basePath ~ '/uploads/events/' ~ booking.event.image %}
+                                        <img src="{{ imageSrc }}" alt="{{ booking.event.nom }}" class="booking-event-image" loading="lazy">
+                                    {% else %}
+                                        <div class="booking-event-image-fallback">
+                                            {{ 'Evt #' ~ booking.id }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Événement</div>
+                                    <div class="detail-value">
+                                        <i class="fas fa-music" style="color: var(--primary);"></i>
+                                        {{ booking.event ? booking.event.nom : 'Non renseigné' }}
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Date de l'événement</div>
+                                    <div class="detail-value">
+                                        <i class="far fa-calendar-check" style="color: var(--gray-600);"></i>
+                                        {{ booking.event ? booking.event.dateEvent|date('d/m/Y') : 'N/A' }}
+                                    </div>
+                                </div>
                                 <div class="detail-item">
                                     <div class="detail-label">Quantité</div>
                                     <div class="detail-value">
@@ -604,8 +652,8 @@
                     </div>
                     <h3 class="empty-title">Aucune réservation</h3>
                     <p class="empty-text">Commencez par créer votre première réservation !</p>
-                    <a href="{{ path('app_booking_new') }}" class="btn-create">
-                        <i class="fas fa-plus"></i> Créer une réservation
+                    <a href="{{ path('app_booking_events') }}" class="btn-create">
+                        <i class="fas fa-plus"></i> Choisir un événement
                     </a>
                 </div>
             {% endif %}

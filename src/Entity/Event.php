@@ -3,6 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
+use App\Entity\Booking;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,6 +34,14 @@ class Event
 
     #[ORM\Column]
     private ?float $prix = null;
+
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: Booking::class, cascade: ['remove'])]
+    private Collection $bookings;
+
+    public function __construct()
+    {
+        $this->bookings = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -107,5 +118,60 @@ class Event
         $this->prix = $prix;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Booking>
+     */
+    public function getBookings(): Collection
+    {
+        return $this->bookings;
+    }
+
+    public function addBooking(Booking $booking): static
+    {
+        if (!$this->bookings->contains($booking)) {
+            $this->bookings->add($booking);
+            $booking->setEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBooking(Booking $booking): static
+    {
+        if ($this->bookings->removeElement($booking)) {
+            if ($booking->getEvent() === $this) {
+                $booking->setEvent(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRemainingCapacity(): int
+    {
+        $used = 0;
+        foreach ($this->bookings as $booking) {
+            if ($booking->getStatus() !== 'cancelled') {
+                $used += $booking->getQuantity() ?? 0;
+            }
+        }
+
+        return max(0, ($this->capacity ?? 0) - $used);
+    }
+
+    public function checkAvailability(int $qty): bool
+    {
+        if ($qty <= 0) {
+            return false;
+        }
+
+        return $qty <= $this->getRemainingCapacity();
+    }
+
+    public function isSoldOut(): bool
+    {
+        return $this->getRemainingCapacity() <= 0;
     }
 }
