@@ -187,8 +187,273 @@
             max-width: 500px;
             margin: 0 auto 1.5rem;
         }
+
+        .search-filter-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-filter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4361ee 0%, #4895ef 50%, #4361ee 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .search-filter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .search-filter-header i {
+            font-size: 1.5rem;
+            color: #4361ee;
+            background: rgba(67, 97, 238, 0.1);
+            padding: 0.75rem;
+            border-radius: 12px;
+        }
+
+        .search-filter-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .search-filter-form {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1.2fr auto;
+            gap: 1.25rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .form-label i {
+            color: #4361ee;
+            font-size: 1rem;
+        }
+
+        .form-control-wrapper {
+            position: relative;
+        }
+
+        .form-control-wrapper i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 1rem;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #2d3748;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1), 0 4px 12px rgba(67, 97, 238, 0.15);
+            background: #ffffff;
+        }
+
+        .form-control:focus + i,
+        .form-control:not(:placeholder-shown) + i {
+            color: #4361ee;
+        }
+
+        select.form-control {
+            padding-left: 3rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234361ee' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 3rem;
+            cursor: pointer;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-search::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-search:hover::before {
+            left: 100%;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-search:active {
+            transform: translateY(0);
+        }
+
+        .filter-reset-container {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .active-filters {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .active-filter-badge {
+            background: linear-gradient(135deg, #4361ee 0%, #4895ef 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+        }
+
+        .active-filter-badge i {
+            font-size: 0.75rem;
+        }
+
+        .btn-reset {
+            background: #ffffff;
+            color: #4361ee;
+            border: 2px solid #4361ee;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-reset:hover {
+            background: #4361ee;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
         
         @media (max-width: 768px) {
+            .search-filter-section {
+                padding: 1.5rem;
+            }
+            
+            .search-filter-form {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .btn-search {
+                width: 100%;
+            }
+            
+            .filter-reset-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .active-filters {
+                justify-content: center;
+            }
+            
+            .btn-reset {
+                width: 100%;
+                justify-content: center;
+            }
+            
             .events-grid {
                 grid-template-columns: 1fr;
             }
@@ -205,6 +470,109 @@
         <div class="page-header">
             <h1 class="page-title">🎉 Événements disponibles</h1>
             <p class="page-subtitle">Découvrez nos prochains événements et réservez votre place dès maintenant !</p>
+        </div>
+
+        <!-- Barre de recherche et filtre par catégorie -->
+        <div class="search-filter-section">
+            <div class="search-filter-header">
+                <i class="fas fa-search"></i>
+                <h2>Rechercher & Filtrer</h2>
+            </div>
+            
+            <form method="GET" action="{{ path('app_booking_events') }}" class="search-filter-form">
+                <div class="form-group">
+                    <label for="search" class="form-label">
+                        <i class="fas fa-search"></i> Recherche
+                    </label>
+                    <div class="form-control-wrapper">
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Nom de l'événement..."
+                               value="{{ currentSearch }}">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category" class="form-label">
+                        <i class="fas fa-filter"></i> Catégorie
+                    </label>
+                    <div class="form-control-wrapper">
+                        <select id="category" name="category" class="form-control">
+                            <option value="">Toutes les catégories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" {% if currentCategory == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-filter"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="venue" class="form-label">
+                        <i class="fas fa-map-marker-alt"></i> Lieu
+                    </label>
+                    <div class="form-control-wrapper">
+                        <select id="venue" name="venue" class="form-control">
+                            <option value="">Tous les lieux</option>
+                            {% for venue in venues %}
+                                <option value="{{ venue.id }}" {% if currentVenue == venue.id %}selected{% endif %}>
+                                    {{ venue.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn-search">
+                        <i class="fas fa-search"></i>
+                        <span>Rechercher</span>
+                    </button>
+                </div>
+            </form>
+            
+            {% if currentSearch or currentCategory or currentVenue %}
+                <div class="filter-reset-container">
+                    <div class="active-filters">
+                        {% if currentSearch %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-search"></i>
+                                Recherche: "{{ currentSearch }}"
+                            </span>
+                        {% endif %}
+                        {% if currentCategory %}
+                            {% for category in categories %}
+                                {% if category.id == currentCategory %}
+                                    <span class="active-filter-badge">
+                                        <i class="fas fa-tag"></i>
+                                        Catégorie: {{ category.name }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {% if currentVenue %}
+                            {% for venue in venues %}
+                                {% if venue.id == currentVenue %}
+                                    <span class="active-filter-badge">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Lieu: {{ venue.name }}
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <a href="{{ path('app_booking_events') }}" class="btn-reset">
+                        <i class="fas fa-times"></i>
+                        Réinitialiser
+                    </a>
+                </div>
+            {% endif %}
         </div>
         
         {% if events|length > 0 %}
@@ -224,6 +592,13 @@
                         {% endif %}
                         <div class="event-content">
                             <h3 class="event-title">{{ event.nom }}</h3>
+                            {% if event.category %}
+                                <div style="margin-bottom: 0.5rem;">
+                                    <span style="background: rgba(37, 99, 235, 0.1); color: #2563eb; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">
+                                        <i class="fas fa-tag"></i> {{ event.category.name }}
+                                    </span>
+                                </div>
+                            {% endif %}
                             <div class="event-date">
                                 <i class="far fa-calendar-alt me-1"></i> {{ event.dateEvent|date('d/m/Y') }}
                             </div>

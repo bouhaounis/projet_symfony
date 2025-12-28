@@ -60,6 +60,13 @@
             gap: 1rem;
             font-size: 0.95rem;
             opacity: 0.95;
+            align-items: center;
+        }
+
+        .event-detail-header-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
         }
 
         .event-detail-content {
@@ -176,6 +183,11 @@
             <div class="event-detail-header-inner">
                 <div class="event-detail-header-title">{{ event.nom }}</div>
                 <div class="event-detail-header-meta">
+                    {% if event.category %}
+                        <span style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 20px; backdrop-filter: blur(10px);">
+                            <i class="fas fa-tag"></i> {{ event.category.name }}
+                        </span>
+                    {% endif %}
                     <span><i class="far fa-calendar-alt"></i> {{ event.dateEvent ? event.dateEvent|date('d/m/Y') : 'Date à venir' }}</span>
                     <span><i class="fas fa-euro-sign"></i> {{ event.prix }} €</span>
                     <span><i class="fas fa-users"></i>
@@ -185,6 +197,9 @@
                             {{ event.getRemainingCapacity() }} / {{ event.capacity }} places
                         {% endif %}
                     </span>
+                    {% if event.venue %}
+                        <span><i class="fas fa-map-marker-alt"></i> {{ event.venue.name }}</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -196,6 +211,29 @@
             </p>
 
             <div class="event-detail-grid">
+                {% if event.category %}
+                    <div class="event-detail-stat">
+                        <div class="event-detail-stat-label">Catégorie</div>
+                        <div class="event-detail-stat-value" style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-tag" style="color: #4361ee;"></i>
+                            {{ event.category.name }}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if event.venue %}
+                    <div class="event-detail-stat">
+                        <div class="event-detail-stat-label">Lieu</div>
+                        <div class="event-detail-stat-value" style="font-size: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-map-marker-alt" style="color: #4361ee;"></i>
+                                <strong>{{ event.venue.name }}</strong>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #6b7280; margin-left: 1.5rem;">
+                                {{ event.venue.adresse }}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="event-detail-stat">
                     <div class="event-detail-stat-label">Prix</div>
                     <div class="event-detail-stat-value">{{ event.prix }} €</div>

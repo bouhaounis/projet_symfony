@@ -6,7 +6,9 @@ use App\Entity\Booking;
 use App\Entity\Ticket;
 use App\Form\BookingType;
 use App\Repository\BookingRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\EventRepository;
+use App\Repository\VenueRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,10 +19,25 @@ use Symfony\Component\Routing\Annotation\Route;
 class BookingController extends AbstractController
 {
     #[Route('/', name: 'app_booking_index', methods: ['GET'])]
-    public function index(EventRepository $eventRepository): Response
+    public function index(Request $request, EventRepository $eventRepository, CategoryRepository $categoryRepository, VenueRepository $venueRepository): Response
     {
+        $search = $request->query->get('search', '');
+        $categoryParam = $request->query->get('category', '');
+        $venueParam = $request->query->get('venue', '');
+        $categoryId = !empty($categoryParam) && is_numeric($categoryParam) ? (int)$categoryParam : null;
+        $venueId = !empty($venueParam) && is_numeric($venueParam) ? (int)$venueParam : null;
+
+        $events = $eventRepository->searchAndFilter($search ?: null, $categoryId, $venueId);
+        $categories = $categoryRepository->findAll();
+        $venues = $venueRepository->findAll();
+
         return $this->render('booking/events.html.twig', [
-            'events' => $eventRepository->findAll(),
+            'events' => $events,
+            'categories' => $categories,
+            'venues' => $venues,
+            'currentSearch' => $search,
+            'currentCategory' => $categoryId,
+            'currentVenue' => $venueId,
         ]);
     }
 
@@ -47,10 +64,25 @@ class BookingController extends AbstractController
     }
 
     #[Route('/events', name: 'app_booking_events', methods: ['GET'])]
-    public function events(EventRepository $eventRepository): Response
+    public function events(Request $request, EventRepository $eventRepository, CategoryRepository $categoryRepository, VenueRepository $venueRepository): Response
     {
+        $search = $request->query->get('search', '');
+        $categoryParam = $request->query->get('category', '');
+        $venueParam = $request->query->get('venue', '');
+        $categoryId = !empty($categoryParam) && is_numeric($categoryParam) ? (int)$categoryParam : null;
+        $venueId = !empty($venueParam) && is_numeric($venueParam) ? (int)$venueParam : null;
+
+        $events = $eventRepository->searchAndFilter($search ?: null, $categoryId, $venueId);
+        $categories = $categoryRepository->findAll();
+        $venues = $venueRepository->findAll();
+
         return $this->render('booking/events.html.twig', [
-            'events' => $eventRepository->findAll(),
+            'events' => $events,
+            'categories' => $categories,
+            'venues' => $venues,
+            'currentSearch' => $search,
+            'currentCategory' => $categoryId,
+            'currentVenue' => $venueId,
         ]);
     }
 

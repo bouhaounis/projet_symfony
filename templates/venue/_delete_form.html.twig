@@ -1,0 +1,7 @@
+<form method="post" action="{{ path('app_venue_delete', {'id': venue.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer ce lieu ? Les événements associés ne seront pas supprimés mais perdront leur lieu.');" style="display: inline;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ venue.id) }}">
+    <button type="submit" class="btn-action btn-delete">
+        <i class="fas fa-trash"></i> Supprimer
+    </button>
+</form>
+

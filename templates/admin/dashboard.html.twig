@@ -416,6 +416,43 @@
                     <h3 class="card-title">
                         <i class="fas fa-users"></i> Utilisateurs Récents
                     </h3>
+                    <!-- Barre de recherche par nom d'utilisateur -->
+                    <form method="GET" action="{{ path('app_admin_dashboard') }}" style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 0.75rem; align-items: stretch; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px; position: relative;">
+                                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #9ca3af; z-index: 1;"></i>
+                                <input type="text" 
+                                       name="userSearch" 
+                                       placeholder="Rechercher par email..."
+                                       value="{{ userSearch ?? '' }}"
+                                       style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 0.95rem; transition: all 0.3s ease; background: #ffffff; font-family: 'Poppins', sans-serif; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);"
+                                       onfocus="this.style.borderColor='#4361ee'; this.style.boxShadow='0 0 0 4px rgba(67, 97, 238, 0.1), 0 4px 12px rgba(67, 97, 238, 0.15)';"
+                                       onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.02)';">
+                            </div>
+                            <button type="submit" 
+                                    style="background: var(--gradient-primary); color: white; border: none; border-radius: 12px; padding: 0.875rem 1.75rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-family: 'Poppins', sans-serif;"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(67, 97, 238, 0.4)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(67, 97, 238, 0.3)';">
+                                <i class="fas fa-search"></i> 
+                                <span>Rechercher</span>
+                            </button>
+                            {% if userSearch %}
+                                <a href="{{ path('app_admin_dashboard') }}" 
+                                   style="background: #ffffff; color: #4361ee; border: 2px solid #4361ee; border-radius: 12px; padding: 0.875rem 1.5rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.3s ease; font-size: 0.95rem; font-family: 'Poppins', sans-serif;"
+                                   onmouseover="this.style.background='#4361ee'; this.style.color='white'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(67, 97, 238, 0.3)';"
+                                   onmouseout="this.style.background='#ffffff'; this.style.color='#4361ee'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                                    <i class="fas fa-times"></i> 
+                                    <span>Réinitialiser</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                        {% if userSearch %}
+                            <div style="margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(67, 97, 238, 0.1); border-radius: 8px; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-info-circle" style="color: #4361ee;"></i>
+                                <span style="color: #4361ee; font-weight: 600; font-size: 0.9rem;">Recherche active: "{{ userSearch }}"</span>
+                            </div>
+                        {% endif %}
+                    </form>
                     {% if recentUsers|length > 0 %}
                         <div class="item-list">
                             {% for user in recentUsers %}
@@ -467,11 +504,17 @@
                     </div>
                     <div class="action-label">Voir les Paiements</div>
                 </a>
-                <a href="{{ path('app_user_new') }}" class="action-card">
+                <a href="{{ path('app_category_index') }}" class="action-card">
                     <div class="action-icon">
-                        <i class="fas fa-user-plus"></i>
+                        <i class="fas fa-tags"></i>
                     </div>
-                    <div class="action-label">Créer un Utilisateur</div>
+                    <div class="action-label">Gérer les Catégories</div>
+                </a>
+                <a href="{{ path('app_venue_index') }}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="action-label">Gérer les Lieux</div>
                 </a>
             </div>
         </div>

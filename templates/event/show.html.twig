@@ -211,6 +211,34 @@
                                 {{ event.dateEvent|date('d/m/Y') }}
                             </div>
                         </div>
+                        {% if event.category %}
+                            <div class="info-box">
+                                <div class="info-label">Catégorie</div>
+                                <div class="info-value" style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-tag" style="color: var(--primary);"></i>
+                                    {{ event.category.name }}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if event.venue %}
+                            <div class="info-box">
+                                <div class="info-label">Lieu</div>
+                                <div class="info-value" style="font-size: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                                        <strong>{{ event.venue.name }}</strong>
+                                    </div>
+                                    <div style="font-size: 0.9rem; color: var(--gray-600); margin-left: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fas fa-location-dot"></i>
+                                        {{ event.venue.adresse }}
+                                    </div>
+                                    <div style="font-size: 0.85rem; color: var(--gray-600); margin-left: 1.5rem; display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                                        <i class="fas fa-users"></i>
+                                        Capacité: {{ event.venue.capacity }} places
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
                         <div class="info-box">
                             <div class="info-label">Capacité</div>
                             <div class="info-value">

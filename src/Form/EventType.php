@@ -3,6 +3,9 @@
 namespace App\Form;
 
 use App\Entity\Event;
+use App\Entity\Category;
+use App\Entity\Venue;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -72,15 +75,29 @@ class EventType extends AbstractType
                     new NotBlank(['message' => 'La date est obligatoire'])
                 ]
             ])
+            ->add('venue', EntityType::class, [
+                'class' => Venue::class,
+                'choice_label' => function(Venue $venue) {
+                    return $venue->getName() . ' (' . $venue->getCapacity() . ' places)';
+                },
+                'label' => 'Lieu (Venue)',
+                'placeholder' => 'Sélectionner un lieu',
+                'attr' => [
+                    'class' => 'form-control'
+                ],
+                'constraints' => [
+                    new NotBlank(['message' => 'Le lieu est obligatoire'])
+                ]
+            ])
             ->add('capacity', IntegerType::class, [
-                'label' => 'Capacité',
+                'label' => 'Capacité (optionnel - sera remplacée par la capacité du lieu)',
+                'required' => false,
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 1,
-                    'placeholder' => 'Nombre de places disponibles'
+                    'placeholder' => 'Laisser vide pour utiliser la capacité du lieu'
                 ],
                 'constraints' => [
-                    new NotBlank(['message' => 'La capacité est obligatoire']),
                     new Positive(['message' => 'La capacité doit être positive'])
                 ]
             ])
@@ -95,6 +112,16 @@ class EventType extends AbstractType
                 'constraints' => [
                     new NotBlank(['message' => 'Le prix est obligatoire']),
                     new Positive(['message' => 'Le prix doit être positif'])
+                ]
+            ])
+            ->add('category', EntityType::class, [
+                'class' => Category::class,
+                'choice_label' => 'name',
+                'label' => 'Catégorie',
+                'placeholder' => 'Sélectionner une catégorie',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control'
                 ]
             ]);
     }

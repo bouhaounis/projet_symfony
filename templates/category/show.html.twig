@@ -1,0 +1,220 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🏷️ Catégorie: {{ category.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --gray-50: #f9fafb;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+        }
+
+        .category-show-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .category-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .category-header-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .category-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600);
+            font-size: 1rem;
+        }
+
+        .events-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .events-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .event-item {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 3px solid var(--primary);
+            transition: all 0.2s ease;
+        }
+
+        .event-item:hover {
+            background: rgba(67, 97, 238, 0.05);
+            transform: translateX(5px);
+        }
+
+        .event-name {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .event-date {
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .btn-action {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .btn-edit {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
+
+        .btn-back {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .empty-events {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="category-show-page">
+        <div class="category-container">
+            <div class="category-header-card">
+                <h1 class="category-title">
+                    <i class="fas fa-tag"></i> {{ category.name }}
+                </h1>
+                <div class="category-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ category.events|length }} événement(s)</span>
+                    </div>
+                </div>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn-action btn-edit">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{{ path('app_category_index') }}" class="btn-action btn-back">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+
+            <div class="events-section">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i> Événements de cette catégorie
+                </h2>
+                {% if category.events|length > 0 %}
+                    <div class="events-list">
+                        {% for event in category.events %}
+                            <div class="event-item">
+                                <div class="event-name">{{ event.titre }}</div>
+                                <div class="event-date">
+                                    <i class="far fa-calendar"></i>
+                                    {{ event.date|date('d/m/Y H:i') }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-events">
+                        <i class="fas fa-calendar-times" style="font-size: 3rem; color: var(--gray-200); margin-bottom: 1rem;"></i>
+                        <p>Aucun événement dans cette catégorie</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

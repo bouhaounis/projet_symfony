@@ -29,11 +29,19 @@ class Event
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateEvent = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $capacity = null;
 
     #[ORM\Column]
     private ?float $prix = null;
+
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Category $category = null;
+
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Venue $venue = null;
 
     #[ORM\OneToMany(mappedBy: 'event', targetEntity: Booking::class, cascade: ['remove'])]
     private Collection $bookings;
@@ -98,13 +106,13 @@ class Event
 
     public function getCapacity(): ?int
     {
-        return $this->capacity;
+        // Return venue capacity if venue is set, otherwise return event capacity (for backward compatibility)
+        return $this->venue?->getCapacity() ?? $this->capacity;
     }
 
-    public function setCapacity(int $capacity): static
+    public function setCapacity(?int $capacity): static
     {
         $this->capacity = $capacity;
-
         return $this;
     }
 
@@ -158,7 +166,8 @@ class Event
             }
         }
 
-        return max(0, ($this->capacity ?? 0) - $used);
+        // Use getCapacity() which returns venue capacity if venue is set
+        return max(0, ($this->getCapacity() ?? 0) - $used);
     }
 
     public function checkAvailability(int $qty): bool
@@ -173,5 +182,27 @@ class Event
     public function isSoldOut(): bool
     {
         return $this->getRemainingCapacity() <= 0;
+    }
+
+    public function getCategory(): ?Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?Category $category): static
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function getVenue(): ?Venue
+    {
+        return $this->venue;
+    }
+
+    public function setVenue(?Venue $venue): static
+    {
+        $this->venue = $venue;
+        return $this;
     }
 }
