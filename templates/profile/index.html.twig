@@ -1,0 +1,498 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}👤 Mon Profil{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Masquer les images d'événements et le header sur la page de profil */
+        .events-background,
+        .color-overlay,
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        .profile-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .profile-page::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .profile-header {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 8px 24px rgba(67, 97, 238, 0.3);
+        }
+
+        .profile-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-email {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .profile-role {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .profile-role.admin {
+            background: rgba(247, 37, 133, 0.1);
+            color: var(--secondary);
+        }
+
+        .profile-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(67, 97, 238, 0.15);
+        }
+
+        .profile-card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-card:hover .profile-card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .profile-card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-card-text {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .btn-profile-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-profile-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+            color: white;
+        }
+
+        .btn-profile-action.secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            width: 100%;
+            justify-content: center;
+            margin-top: auto;
+        }
+
+        .btn-profile-action.secondary:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .profile-card-actions {
+            margin-top: auto;
+            padding-top: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(67, 97, 238, 0.05);
+            border-radius: 8px;
+            margin-top: auto;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+            font-size: 1rem;
+            word-break: break-all;
+        }
+
+        /* Footer amélioré pour la page de profil */
+        .profile-footer {
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 2px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .profile-footer-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .profile-footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .profile-footer-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-stat-card {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(72, 149, 239, 0.05) 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.15);
+            border-color: var(--primary);
+        }
+
+        .profile-stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin: 0 auto 1rem;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .profile-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .profile-quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid rgba(67, 97, 238, 0.2);
+            border-radius: 12px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .quick-action-btn i {
+            font-size: 1.5rem;
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover i {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .profile-footer-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-footer-content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="profile-page">
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1 class="profile-name">{{ user.email }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+                <span class="profile-role {% if 'ROLE_ADMIN' in user.roles %}admin{% endif %}">
+                    {% if 'ROLE_ADMIN' in user.roles %}
+                        <i class="fas fa-crown"></i> Administrateur
+                    {% else %}
+                        <i class="fas fa-user"></i> Utilisateur
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="profile-cards">
+                <div class="profile-card">
+                    <div class="profile-card-content">
+                        <div class="profile-card-icon" style="background: rgba(67, 97, 238, 0.1); color: #4361ee;">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3 class="profile-card-title">Adresse Email</h3>
+                        <p class="profile-card-text">
+                            Modifiez votre adresse email pour vous connecter à votre compte.
+                        </p>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Email actuel :</span>
+                                <span class="info-value">{{ user.email }}</span>
+                            </div>
+                        </div>
+                        <div class="profile-card-actions">
+                            <a href="{{ path('app_profile_edit_email') }}" class="btn-profile-action secondary">
+                                <i class="fas fa-edit"></i> Modifier l'email
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card">
+                    <div class="profile-card-content">
+                        <div class="profile-card-icon" style="background: rgba(34, 197, 94, 0.1); color: #22c55e;">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3 class="profile-card-title">Mot de passe</h3>
+                        <p class="profile-card-text">
+                            Changez votre mot de passe régulièrement pour assurer la sécurité de votre compte.
+                        </p>
+                        <div class="profile-card-actions">
+                            <a href="{{ path('app_profile_change_password') }}" class="btn-profile-action secondary">
+                                <i class="fas fa-key"></i> Changer le mot de passe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer amélioré avec statistiques -->
+            <div class="profile-footer">
+                <div class="profile-footer-content">
+                    <h2 class="profile-footer-title">
+                        <i class="fas fa-chart-line"></i>
+                        Statistiques de votre compte
+                    </h2>
+
+                    <div class="profile-footer-stats">
+                        <div class="profile-stat-card">
+                            <div class="profile-stat-icon">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <div class="profile-stat-value">
+                                {{ user.bookings|length }}
+                            </div>
+                            <div class="profile-stat-label">Réservations</div>
+                        </div>
+
+                        <div class="profile-stat-card">
+                            <div class="profile-stat-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="profile-stat-value" style="color: #22c55e;">
+                                {{ user.bookings|filter(b => b.status == 'confirmed')|length }}
+                            </div>
+                            <div class="profile-stat-label">Confirmées</div>
+                        </div>
+
+                        <div class="profile-stat-card">
+                            <div class="profile-stat-icon" style="background: linear-gradient(135deg, #ff9e00, #ff8c00);">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="profile-stat-value" style="color: #ff9e00;">
+                                {% set totalPaid = 0 %}
+                                {% for booking in user.bookings %}
+                                    {% set totalPaid = totalPaid + booking.getTotalPaid() %}
+                                {% endfor %}
+                                {{ totalPaid|number_format(0, ',', ' ') }}€
+                            </div>
+                            <div class="profile-stat-label">Total payé</div>
+                        </div>
+
+                        <div class="profile-stat-card">
+                            <div class="profile-stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="profile-stat-value" style="color: #8b5cf6;">
+                                {{ user.tickets|length }}
+                            </div>
+                            <div class="profile-stat-label">Billets</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-quick-actions">
+                        <a href="{{ path('app_booking_events') }}" class="quick-action-btn">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Découvrir les événements</span>
+                        </a>
+                        <a href="{{ path('app_booking_reservations') }}" class="quick-action-btn">
+                            <i class="fas fa-list"></i>
+                            <span>Voir toutes mes réservations</span>
+                        </a>
+                        <a href="{{ path('app_payment_index') }}" class="quick-action-btn">
+                            <i class="fas fa-receipt"></i>
+                            <span>Historique des paiements</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

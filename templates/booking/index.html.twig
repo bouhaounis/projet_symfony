@@ -485,11 +485,118 @@
                 </div>
             </div>
 
+            <!-- Filtres avancés -->
+            <div class="search-filter-section" style="background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); border: 1px solid rgba(67, 97, 238, 0.1);">
+                <div class="search-filter-header" style="margin-bottom: 1.5rem;">
+                    <i class="fas fa-filter"></i>
+                    <h2 style="margin: 0; font-size: 1.5rem; color: var(--primary);">Filtres avancés</h2>
+                </div>
+                
+                <form method="GET" action="{{ path('app_booking_reservations') }}" class="search-filter-form">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label for="status" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="fas fa-info-circle"></i> Statut
+                            </label>
+                            <select id="status" name="status" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending" {% if currentStatus == 'pending' %}selected{% endif %}>En attente</option>
+                                <option value="confirmed" {% if currentStatus == 'confirmed' %}selected{% endif %}>Confirmée</option>
+                                <option value="cancelled" {% if currentStatus == 'cancelled' %}selected{% endif %}>Annulée</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="event" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="fas fa-music"></i> Événement
+                            </label>
+                            <select id="event" name="event" class="form-control" style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                                <option value="">Tous les événements</option>
+                                {% for event in events|default([]) %}
+                                    <option value="{{ event.id }}" {% if currentEvent == event.id %}selected{% endif %}>
+                                        {{ event.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dateFrom" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="far fa-calendar"></i> Date début
+                            </label>
+                            <input type="date" 
+                                   id="dateFrom" 
+                                   name="dateFrom" 
+                                   class="form-control" 
+                                   value="{{ currentDateFrom }}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dateTo" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="far fa-calendar"></i> Date fin
+                            </label>
+                            <input type="date" 
+                                   id="dateTo" 
+                                   name="dateTo" 
+                                   class="form-control" 
+                                   value="{{ currentDateTo }}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalMin" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="fas fa-euro-sign"></i> Total minimum (€)
+                            </label>
+                            <input type="number" 
+                                   id="totalMin" 
+                                   name="totalMin" 
+                                   class="form-control" 
+                                   step="0.01" 
+                                   min="0"
+                                   placeholder="0.00"
+                                   value="{{ currentTotalMin }}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="totalMax" class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--gray-700); font-weight: 600;">
+                                <i class="fas fa-euro-sign"></i> Total maximum (€)
+                            </label>
+                            <input type="number" 
+                                   id="totalMax" 
+                                   name="totalMax" 
+                                   class="form-control" 
+                                   step="0.01" 
+                                   min="0"
+                                   placeholder="999.99"
+                                   value="{{ currentTotalMax }}"
+                                   style="width: 100%; padding: 0.75rem; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 0.95rem;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button type="submit" class="btn-search" style="padding: 0.75rem 2rem; background: var(--gradient-primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-search"></i>
+                            <span>Rechercher</span>
+                        </button>
+                        
+                        {% if currentStatus or currentDateFrom or currentDateTo or currentTotalMin or currentTotalMax or currentEvent %}
+                            <a href="{{ path('app_booking_reservations') }}" class="btn-reset" style="padding: 0.75rem 1.5rem; background: white; color: var(--primary); border: 1.5px solid var(--primary); border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-times"></i>
+                                Réinitialiser
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
             <!-- Statistiques -->
-            {% set totalBookings = bookings|length %}
-            {% set confirmedBookings = bookings|filter(b => b.status == 'confirmed')|length %}
-            {% set cancelledBookings = bookings|filter(b => b.status == 'cancelled')|length %}
-            {% set totalRevenue = bookings|reduce((sum, b) => sum + b.total, 0) %}
+            {% set bookingsList = bookings.items is defined ? bookings.items : bookings %}
+            {% set totalBookings = bookings.totalItemCount is defined ? bookings.totalItemCount : bookingsList|length %}
+            {% set confirmedBookings = bookingsList|filter(b => b.status == 'confirmed')|length %}
+            {% set cancelledBookings = bookingsList|filter(b => b.status == 'cancelled')|length %}
+            {% set totalRevenue = bookingsList|reduce((sum, b) => sum + b.total, 0) %}
 
             <div class="stats-grid">
                 <div class="stat-card">
@@ -526,9 +633,10 @@
             </div>
 
             <!-- Grille de cartes -->
-            {% if bookings|length > 0 %}
+            {% set bookingsItems = bookings.items is defined ? bookings.items : bookings %}
+            {% if bookingsItems|length > 0 %}
                 <div class="bookings-grid">
-                    {% for booking in bookings %}
+                    {% for booking in bookingsItems %}
                         <div class="booking-card">
                             <!-- En-tête de la carte -->
                             <div class="booking-card-header">
@@ -595,6 +703,23 @@
                                 </div>
                             </div>
 
+                            <!-- Indicateur de progression de paiement -->
+                            {% set totalPaid = booking.getTotalPaid() %}
+                            {% set totalAmount = booking.total %}
+                            {% set remainingBalance = booking.getRemainingBalance() %}
+                            {% set paymentProgress = totalAmount > 0 ? (totalPaid / totalAmount * 100) : 0 %}
+                            {% set paymentProgress = paymentProgress > 100 ? 100 : paymentProgress %}
+                            
+                            <div style="margin-bottom: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 0.75rem; color: var(--gray-600); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Progression</span>
+                                    <span style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">{{ paymentProgress|number_format(0) }}%</span>
+                                </div>
+                                <div style="background: #e9ecef; border-radius: 8px; height: 12px; overflow: hidden; position: relative;">
+                                    <div style="background: {% if paymentProgress == 100 %}linear-gradient(90deg, #22c55e, #16a34a){% elseif paymentProgress > 0 %}linear-gradient(90deg, #4361ee, #4895ef){% else %}#e9ecef{% endif %}; height: 100%; width: {{ paymentProgress }}%; transition: width 0.6s ease; border-radius: 8px;"></div>
+                                </div>
+                            </div>
+
                             <!-- Informations financières -->
                             <div class="booking-financial">
                                 <div class="financial-item">
@@ -645,6 +770,13 @@
                         </div>
                     {% endfor %}
                 </div>
+                
+                {# Pagination #}
+                {% if bookings is iterable and bookings.currentPageNumber is defined %}
+                <div class="pagination-wrapper" style="margin-top: 3rem; display: flex; justify-content: center;">
+                    {{ knp_pagination_render(bookings) }}
+                </div>
+                {% endif %}
             {% else %}
                 <div class="empty-state">
                     <div class="empty-icon">

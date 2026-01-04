@@ -528,6 +528,72 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                 </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="dateFrom" class="form-label">
+                            <i class="far fa-calendar"></i> Date début
+                        </label>
+                        <div class="form-control-wrapper">
+                            <input type="date" 
+                                   id="dateFrom" 
+                                   name="dateFrom" 
+                                   class="form-control" 
+                                   value="{{ currentDateFrom }}">
+                            <i class="far fa-calendar"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dateTo" class="form-label">
+                            <i class="far fa-calendar"></i> Date fin
+                        </label>
+                        <div class="form-control-wrapper">
+                            <input type="date" 
+                                   id="dateTo" 
+                                   name="dateTo" 
+                                   class="form-control" 
+                                   value="{{ currentDateTo }}">
+                            <i class="far fa-calendar"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="priceMin" class="form-label">
+                            <i class="fas fa-euro-sign"></i> Prix minimum (€)
+                        </label>
+                        <div class="form-control-wrapper">
+                            <input type="number" 
+                                   id="priceMin" 
+                                   name="priceMin" 
+                                   class="form-control" 
+                                   step="0.01" 
+                                   min="0"
+                                   placeholder="0.00"
+                                   value="{{ currentPriceMin }}">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priceMax" class="form-label">
+                            <i class="fas fa-euro-sign"></i> Prix maximum (€)
+                        </label>
+                        <div class="form-control-wrapper">
+                            <input type="number" 
+                                   id="priceMax" 
+                                   name="priceMax" 
+                                   class="form-control" 
+                                   step="0.01" 
+                                   min="0"
+                                   placeholder="999.99"
+                                   value="{{ currentPriceMax }}">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="form-group">
                     <button type="submit" class="btn-search">
@@ -537,7 +603,7 @@
                 </div>
             </form>
             
-            {% if currentSearch or currentCategory or currentVenue %}
+            {% if currentSearch or currentCategory or currentVenue or currentDateFrom or currentDateTo or currentPriceMin or currentPriceMax %}
                 <div class="filter-reset-container">
                     <div class="active-filters">
                         {% if currentSearch %}
@@ -565,6 +631,30 @@
                                     </span>
                                 {% endif %}
                             {% endfor %}
+                        {% endif %}
+                        {% if currentDateFrom %}
+                            <span class="active-filter-badge">
+                                <i class="far fa-calendar"></i>
+                                Du: {{ currentDateFrom|date('d/m/Y') }}
+                            </span>
+                        {% endif %}
+                        {% if currentDateTo %}
+                            <span class="active-filter-badge">
+                                <i class="far fa-calendar"></i>
+                                Au: {{ currentDateTo|date('d/m/Y') }}
+                            </span>
+                        {% endif %}
+                        {% if currentPriceMin %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-euro-sign"></i>
+                                Prix min: {{ currentPriceMin }}€
+                            </span>
+                        {% endif %}
+                        {% if currentPriceMax %}
+                            <span class="active-filter-badge">
+                                <i class="fas fa-euro-sign"></i>
+                                Prix max: {{ currentPriceMax }}€
+                            </span>
                         {% endif %}
                     </div>
                     <a href="{{ path('app_booking_events') }}" class="btn-reset">
@@ -630,6 +720,11 @@
                         </div>
                     </div>
                 {% endfor %}
+            </div>
+            
+            {# Pagination #}
+            <div class="pagination-wrapper" style="margin-top: 3rem; display: flex; justify-content: center;">
+                {{ knp_pagination_render(events) }}
             </div>
         {% else %}
             <div class="empty-state">

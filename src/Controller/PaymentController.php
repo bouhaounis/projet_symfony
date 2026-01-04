@@ -6,6 +6,7 @@ use App\Entity\Payment;
 use App\Form\PaymentType;
 use App\Repository\PaymentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,10 +16,29 @@ use Symfony\Component\Routing\Annotation\Route;
 class PaymentController extends AbstractController
 {
     #[Route('/', name: 'app_payment_index', methods: ['GET'])]
-    public function index(PaymentRepository $paymentRepository): Response
+    public function index(Request $request, PaginatorInterface $paginator, PaymentRepository $paymentRepository): Response
     {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Filtrer les paiements par utilisateur connecté
+        $queryBuilder = $paymentRepository->createQueryBuilder('p')
+            ->join('p.booking', 'b')
+            ->where('b.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('p.createdAt', 'DESC');
+
+        $payments = $paginator->paginate(
+            $queryBuilder->getQuery(),
+            $request->query->getInt('page', 1),
+            15 // 15 paiements par page
+        );
+
         return $this->render('payment/index.html.twig', [
-            'payments' => $paymentRepository->findAll(),
+            'payments' => $payments,
         ]);
     }
 
@@ -84,6 +104,14 @@ class PaymentController extends AbstractController
             $entityManager->persist($payment);
             $entityManager->flush();
 
+            // Envoyer un email de confirmation de paiement
+            try {
+                $emailService = $this->container->get(\App\Service\EmailNotificationService::class);
+                $emailService->sendPaymentConfirmation($payment);
+            } catch (\Exception $e) {
+                error_log('Erreur envoi email: ' . $e->getMessage());
+            }
+
             $this->addFlash('success', 'Paiement créé avec succès ! Vous pouvez créer un nouveau paiement si nécessaire.');
             
             // Recharger la réservation pour avoir les données à jour
@@ -108,6 +136,22 @@ class PaymentController extends AbstractController
     #[Route('/{id}', name: 'app_payment_show', methods: ['GET'])]
     public function show(Payment $payment): Response
     {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Vérifier que le paiement appartient à l'utilisateur connecté
+        $booking = $payment->getBooking();
+        if (!$booking || $booking->getUser() !== $user) {
+            // Admin peut voir tous les paiements
+            if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+                $this->addFlash('error', 'Vous n\'avez pas accès à ce paiement.');
+                return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
+            }
+        }
+
         return $this->render('payment/show.html.twig', [
             'payment' => $payment,
         ]);
@@ -116,6 +160,19 @@ class PaymentController extends AbstractController
     #[Route('/{id}/edit', name: 'app_payment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Payment $payment, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+        
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Vérifier que le paiement appartient à l'utilisateur connecté ou est admin
+        $booking = $payment->getBooking();
+        if (!$booking || ($booking->getUser() !== $user && !in_array('ROLE_ADMIN', $user->getRoles()))) {
+            $this->addFlash('error', 'Vous n\'avez pas accès à ce paiement.');
+            return $this->redirectToRoute('app_payment_index', [], Response::HTTP_SEE_OTHER);
+        }
+
         $form = $this->createForm(PaymentType::class, $payment);
         $form->handleRequest($request);
 

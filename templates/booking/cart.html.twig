@@ -367,10 +367,11 @@
                 <p class="cart-subtitle">Réservations en attente de paiement</p>
             </div>
 
-            {% if bookings|length > 0 %}
+            {% set bookingsItems = bookings.items is defined ? bookings.items : bookings %}
+            {% if bookingsItems|length > 0 %}
                 {% set totalPending = 0 %}
                 {% set pendingCount = 0 %}
-                {% for booking in bookings %}
+                {% for booking in bookingsItems %}
                     {% if booking.canCreatePayment() %}
                         {% set totalPending = totalPending + booking.getRemainingBalance() %}
                         {% set pendingCount = pendingCount + 1 %}
@@ -397,6 +398,46 @@
                                         <i class="fas fa-clock"></i> En attente
                                     </span>
                                 {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Indicateur de progression de paiement -->
+                        {% set totalPaid = booking.getTotalPaid() %}
+                        {% set totalAmount = booking.total %}
+                        {% set remainingBalance = booking.getRemainingBalance() %}
+                        {% set paymentProgress = totalAmount > 0 ? (totalPaid / totalAmount * 100) : 0 %}
+                        {% set paymentProgress = paymentProgress > 100 ? 100 : paymentProgress %}
+                        
+                        <div style="background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(72, 149, 239, 0.05) 100%); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid rgba(67, 97, 238, 0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                <span style="font-size: 0.9rem; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-chart-line"></i>
+                                    Progression du paiement
+                                </span>
+                                <span style="font-size: 1rem; font-weight: 700; color: var(--primary);">{{ paymentProgress|number_format(0) }}%</span>
+                            </div>
+                            <div style="background: #e9ecef; border-radius: 10px; height: 18px; overflow: hidden; margin-bottom: 1rem; position: relative;">
+                                <div style="background: {% if paymentProgress == 100 %}linear-gradient(90deg, #22c55e, #16a34a){% elseif paymentProgress > 0 %}linear-gradient(90deg, #4361ee, #4895ef){% else %}#e9ecef{% endif %}; height: 100%; width: {{ paymentProgress }}%; transition: width 0.6s ease; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem;">
+                                    {% if paymentProgress > 15 %}
+                                        <span style="color: white; font-size: 0.7rem; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">
+                                            {{ paymentProgress|number_format(0) }}%
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.85rem;">
+                                <div style="text-align: center;">
+                                    <div style="color: #666; margin-bottom: 0.25rem; font-weight: 600;">Total</div>
+                                    <div style="color: var(--primary); font-weight: 700; font-size: 1rem;">{{ totalAmount|number_format(2, ',', ' ') }} €</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #666; margin-bottom: 0.25rem; font-weight: 600;">Payé</div>
+                                    <div style="color: #22c55e; font-weight: 700; font-size: 1rem;">{{ totalPaid|number_format(2, ',', ' ') }} €</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="color: #666; margin-bottom: 0.25rem; font-weight: 600;">Reste</div>
+                                    <div style="color: {% if remainingBalance > 0 %}#ef4444{% else %}#22c55e{% endif %}; font-weight: 700; font-size: 1rem;">{{ remainingBalance|number_format(2, ',', ' ') }} €</div>
+                                </div>
                             </div>
                         </div>
 
@@ -487,6 +528,13 @@
                         </div>
                     </div>
                 {% endfor %}
+
+                {# Pagination #}
+                {% if bookings is iterable and bookings.currentPageNumber is defined %}
+                <div class="pagination-wrapper" style="margin-top: 3rem; display: flex; justify-content: center;">
+                    {{ knp_pagination_render(bookings) }}
+                </div>
+                {% endif %}
 
                 {% if pendingCount > 0 %}
                     <div class="total-summary">

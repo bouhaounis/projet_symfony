@@ -1,0 +1,60 @@
+/* Style pour la pagination KnpPaginator */
+.pagination-wrapper {
+    margin: 3rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.pagination li {
+    margin: 0;
+}
+
+.pagination a,
+.pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: 1.5px solid #e5e7eb;
+    background: white;
+    color: #4361ee;
+}
+
+.pagination a:hover {
+    background: linear-gradient(135deg, #4361ee, #4895ef);
+    color: white;
+    border-color: #4361ee;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.pagination .active span {
+    background: linear-gradient(135deg, #4361ee, #4895ef);
+    color: white;
+    border-color: #4361ee;
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+}
+
+.pagination .disabled span {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+}
+

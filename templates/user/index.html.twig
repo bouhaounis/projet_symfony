@@ -297,7 +297,8 @@
             </div>
 
             <div class="users-table-card">
-                {% if users|length > 0 %}
+                {% set usersList = users.items is defined ? users.items : users %}
+                {% if usersList|length > 0 %}
                     <table class="users-table">
                         <thead>
                             <tr>
@@ -309,7 +310,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for user in users %}
+                            {% set usersList = users.items is defined ? users.items : users %}
+                            {% for user in usersList %}
                                 <tr>
                                     <td>
                                         <span class="user-id">#{{ user.id }}</span>
@@ -361,6 +363,13 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    
+                    {# Pagination #}
+                    {% if users is iterable and users.currentPageNumber is defined %}
+                    <div class="pagination-wrapper" style="margin-top: 3rem; display: flex; justify-content: center;">
+                        {{ knp_pagination_render(users) }}
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
                         <div class="empty-icon">

@@ -1,0 +1,72 @@
+{% extends 'emails/base_email.html.twig' %}
+
+{% block content %}
+<div class="email-content">
+    <h2 style="color: #ef4444; margin-top: 0;">❌ Annulation de réservation</h2>
+    
+    <p>Bonjour <strong>{{ user.email }}</strong>,</p>
+    
+    <p>Votre réservation a été annulée. Voici les détails :</p>
+    
+    <div class="info-box" style="border-left-color: #ef4444;">
+        <div class="detail-row">
+            <span class="detail-label">Numéro de réservation :</span>
+            <span class="detail-value"><strong>#{{ booking.id }}</strong></span>
+        </div>
+        {% if event %}
+        <div class="detail-row">
+            <span class="detail-label">Événement :</span>
+            <span class="detail-value"><strong>{{ event.nom }}</strong></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Date de l'événement :</span>
+            <span class="detail-value">{{ event.dateEvent|date('d/m/Y') }}</span>
+        </div>
+        {% endif %}
+        <div class="detail-row">
+            <span class="detail-label">Quantité de billets :</span>
+            <span class="detail-value">{{ booking.quantity }} billet(s)</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Montant total :</span>
+            <span class="detail-value">{{ booking.total|number_format(2, ',', ' ') }} €</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Montant payé :</span>
+            <span class="detail-value">{{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Statut :</span>
+            <span class="detail-value">
+                <span class="badge badge-danger">Annulée</span>
+            </span>
+        </div>
+    </div>
+
+    {% if booking.getTotalPaid() > 0 %}
+    <p style="margin-top: 25px;">
+        <strong>💰 Remboursement :</strong> Si vous avez effectué des paiements pour cette réservation, un remboursement sera traité selon nos conditions générales.
+    </p>
+    {% endif %}
+
+    {% if reason %}
+    <div class="info-box" style="background-color: #fef3c7; border-left-color: #ff9e00;">
+        <p style="margin: 0;"><strong>Raison de l'annulation :</strong></p>
+        <p style="margin: 10px 0 0 0;">{{ reason }}</p>
+    </div>
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        Si vous souhaitez créer une nouvelle réservation, n'hésitez pas à consulter nos événements disponibles.
+    </p>
+    
+    <p style="text-align: center;">
+        <a href="{{ absolute_url(path('app_booking_events')) }}" class="button">Voir les événements</a>
+    </p>
+
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+        Si vous avez des questions concernant cette annulation, n'hésitez pas à nous contacter.
+    </p>
+</div>
+{% endblock %}
+

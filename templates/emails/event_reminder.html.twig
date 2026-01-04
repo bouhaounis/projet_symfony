@@ -1,0 +1,59 @@
+{% extends 'emails/base_email.html.twig' %}
+
+{% block content %}
+<div class="email-content">
+    <h2 style="color: #4361ee; margin-top: 0;">⏰ Rappel : Votre événement arrive bientôt !</h2>
+    
+    <p>Bonjour <strong>{{ user.email }}</strong>,</p>
+    
+    <p>Nous vous rappelons que vous avez une réservation pour un événement qui se déroule <strong>demain</strong> !</p>
+    
+    <div class="info-box">
+        <div class="detail-row">
+            <span class="detail-label">Numéro de réservation :</span>
+            <span class="detail-value"><strong>#{{ booking.id }}</strong></span>
+        </div>
+        {% if event %}
+        <div class="detail-row">
+            <span class="detail-label">Événement :</span>
+            <span class="detail-value"><strong>{{ event.nom }}</strong></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Date de l'événement :</span>
+            <span class="detail-value" style="color: #4361ee; font-weight: 600; font-size: 16px;">
+                {{ event.dateEvent|date('d/m/Y') }}
+            </span>
+        </div>
+        {% if event.venue %}
+        <div class="detail-row">
+            <span class="detail-label">Lieu :</span>
+            <span class="detail-value">{{ event.venue.name }}, {{ event.venue.adresse }}</span>
+        </div>
+        {% endif %}
+        {% endif %}
+        <div class="detail-row">
+            <span class="detail-label">Quantité de billets :</span>
+            <span class="detail-value">{{ booking.quantity }} billet(s)</span>
+        </div>
+    </div>
+
+    <p style="margin-top: 25px;">
+        <strong>📱 N'oubliez pas :</strong> Assurez-vous d'avoir vos billets avec vous lors de l'événement. Vous pouvez les télécharger depuis votre espace personnel.
+    </p>
+
+    {% if booking.getRemainingBalance() > 0 %}
+    <div class="info-box" style="background-color: #fef3c7; border-left-color: #ff9e00;">
+        <p style="margin: 0;"><strong>⚠️ Attention :</strong> Il reste un solde de <strong>{{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €</strong> à régler pour cette réservation.</p>
+    </div>
+    {% endif %}
+
+    <p style="text-align: center; margin-top: 30px;">
+        <a href="{{ absolute_url(path('app_booking_show', {id: booking.id})) }}" class="button">Voir ma réservation</a>
+    </p>
+
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+        Nous vous souhaitons un excellent événement !
+    </p>
+</div>
+{% endblock %}
+

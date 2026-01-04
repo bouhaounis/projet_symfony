@@ -1,0 +1,29 @@
+{% extends 'emails/base_email.html.twig' %}
+
+{% block content %}
+<div class="email-content">
+    <h2 style="color: #4361ee; margin-top: 0;">🎉 Bienvenue sur Event Booking System !</h2>
+    
+    <p>Bonjour <strong>{{ user.email }}</strong>,</p>
+    
+    <p>Nous sommes ravis de vous accueillir sur notre plateforme de réservation d'événements !</p>
+    
+    <p>Vous pouvez désormais :</p>
+    <ul style="line-height: 2;">
+        <li>📅 Consulter tous nos événements disponibles</li>
+        <li>🎫 Réserver vos billets en ligne</li>
+        <li>💳 Effectuer vos paiements de manière sécurisée</li>
+        <li>📧 Recevoir vos confirmations et rappels par email</li>
+        <li>🎟️ Télécharger vos billets en PDF</li>
+    </ul>
+
+    <p style="text-align: center; margin-top: 30px;">
+        <a href="{{ absolute_url(path('app_booking_events')) }}" class="button">Découvrir les événements</a>
+    </p>
+
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+        Si vous avez des questions, n'hésitez pas à nous contacter. Nous sommes là pour vous aider !
+    </p>
+</div>
+{% endblock %}
+

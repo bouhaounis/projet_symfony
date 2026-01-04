@@ -52,7 +52,21 @@ class Payment
             return false;
         }
 
-        $success = rand(1, 100) > 5;
+        // Simulation de traitement de paiement plus sécurisée
+        // Utilise un hash déterministe basé sur des critères réels pour une simulation cohérente
+        // En production, remplacer par un vrai gateway (Stripe, PayPal, etc.)
+        $paymentData = sprintf(
+            '%s-%s-%s-%s',
+            $this->getId() ?? uniqid(),
+            $this->getAmount(),
+            $this->getMethode(),
+            $this->getCreatedAt()?->getTimestamp()
+        );
+        
+        // Génère un hash et détermine le succès (95% de taux de succès simulé)
+        $hash = hash('sha256', $paymentData);
+        $hashValue = hexdec(substr($hash, 0, 8));
+        $success = ($hashValue % 100) < 95;
 
         if ($success) {
             $this->status = 'completed';
@@ -76,7 +90,17 @@ class Payment
             return false;
         }
 
-        $success = rand(1, 100) > 10;
+        // Simulation de remboursement plus sécurisée (90% de taux de succès simulé)
+        $refundData = sprintf(
+            '%s-refund-%s-%s',
+            $this->getId(),
+            $this->getAmount(),
+            $this->getCreatedAt()?->getTimestamp()
+        );
+        
+        $hash = hash('sha256', $refundData);
+        $hashValue = hexdec(substr($hash, 0, 8));
+        $success = ($hashValue % 100) < 90;
 
         if ($success) {
             $this->status = 'refunded';

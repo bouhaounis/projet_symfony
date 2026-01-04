@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use App\Entity\Ticket;
+use App\Entity\Booking;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -40,6 +41,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Ticket::class)]
     private Collection $tickets;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Booking::class)]
+    private Collection $bookings;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -48,6 +52,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->tickets = new ArrayCollection();
+        $this->bookings = new ArrayCollection();
     }
 
     public function getEmail(): ?string
@@ -178,6 +183,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->tickets->removeElement($ticket)) {
             if ($ticket->getUser() === $this) {
                 $ticket->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Booking>
+     */
+    public function getBookings(): Collection
+    {
+        return $this->bookings;
+    }
+
+    public function addBooking(Booking $booking): static
+    {
+        if (!$this->bookings->contains($booking)) {
+            $this->bookings->add($booking);
+            $booking->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBooking(Booking $booking): static
+    {
+        if ($this->bookings->removeElement($booking)) {
+            if ($booking->getUser() === $this) {
+                $booking->setUser(null);
             }
         }
 

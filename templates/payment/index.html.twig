@@ -364,10 +364,11 @@
             </div>
 
             <!-- Statistiques -->
-            {% set totalPayments = payments|length %}
-            {% set completedPayments = payments|filter(p => p.status == 'completed')|length %}
-            {% set pendingPayments = payments|filter(p => p.status == 'pending')|length %}
-            {% set totalAmount = payments|filter(p => p.status == 'completed')|reduce((sum, p) => sum + p.amount, 0) %}
+            {% set paymentsList = payments.items is defined ? payments.items : payments %}
+            {% set totalPayments = payments.totalItemCount is defined ? payments.totalItemCount : paymentsList|length %}
+            {% set completedPayments = paymentsList|filter(p => p.status == 'completed')|length %}
+            {% set pendingPayments = paymentsList|filter(p => p.status == 'pending')|length %}
+            {% set totalAmount = paymentsList|filter(p => p.status == 'completed')|reduce((sum, p) => sum + p.amount, 0) %}
 
             <div class="stats-grid">
                 <div class="stat-card">
@@ -419,7 +420,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for payment in payments %}
+                            {% for payment in paymentsList %}
                                 <tr>
                                     <td>
                                         <span class="payment-id">#{{ payment.id }}</span>
@@ -513,6 +514,13 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    
+                    {# Pagination #}
+                    {% if payments is iterable and payments.currentPageNumber is defined %}
+                    <div class="pagination-wrapper" style="margin-top: 3rem; display: flex; justify-content: center;">
+                        {{ knp_pagination_render(payments) }}
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
                         <div class="empty-icon">

@@ -66,6 +66,14 @@ class SecurityController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            // Envoyer un email de bienvenue
+            try {
+                $emailService = $this->container->get(\App\Service\EmailNotificationService::class);
+                $emailService->sendWelcomeEmail($user);
+            } catch (\Exception $e) {
+                error_log('Erreur envoi email bienvenue: ' . $e->getMessage());
+            }
+
             $this->addFlash('success', 'Inscription réussie ! Vous pouvez maintenant vous connecter.');
 
             return $this->redirectToRoute('app_login');

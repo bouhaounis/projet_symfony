@@ -1,0 +1,84 @@
+{% extends 'emails/base_email.html.twig' %}
+
+{% block content %}
+<div class="email-content">
+    <h2 style="color: #4361ee; margin-top: 0;">✅ Confirmation de réservation</h2>
+    
+    <p>Bonjour <strong>{{ user.email }}</strong>,</p>
+    
+    <p>Votre réservation a été confirmée avec succès ! Voici les détails :</p>
+    
+    <div class="info-box">
+        <div class="detail-row">
+            <span class="detail-label">Numéro de réservation :</span>
+            <span class="detail-value"><strong>#{{ booking.id }}</strong></span>
+        </div>
+        {% if event %}
+        <div class="detail-row">
+            <span class="detail-label">Événement :</span>
+            <span class="detail-value"><strong>{{ event.nom }}</strong></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Date de l'événement :</span>
+            <span class="detail-value">{{ event.dateEvent|date('d/m/Y') }}</span>
+        </div>
+        {% if event.venue %}
+        <div class="detail-row">
+            <span class="detail-label">Lieu :</span>
+            <span class="detail-value">{{ event.venue.name }}, {{ event.venue.adresse }}</span>
+        </div>
+        {% endif %}
+        {% endif %}
+        <div class="detail-row">
+            <span class="detail-label">Quantité de billets :</span>
+            <span class="detail-value">{{ booking.quantity }} billet(s)</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Statut :</span>
+            <span class="detail-value">
+                {% if booking.status == 'confirmed' %}
+                    <span class="badge badge-success">Confirmée</span>
+                {% elseif booking.status == 'pending' %}
+                    <span class="badge badge-warning">En attente</span>
+                {% else %}
+                    <span class="badge badge-danger">{{ booking.status|capitalize }}</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Montant total :</span>
+            <span class="detail-value"><strong style="font-size: 18px; color: #4361ee;">{{ booking.total|number_format(2, ',', ' ') }} €</strong></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Montant payé :</span>
+            <span class="detail-value" style="color: #22c55e;">{{ booking.getTotalPaid()|number_format(2, ',', ' ') }} €</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Solde restant :</span>
+            <span class="detail-value" style="color: #ef4444;">{{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €</span>
+        </div>
+    </div>
+
+    {% if booking.getRemainingBalance() > 0 %}
+    <p style="margin-top: 25px;">
+        <strong>💳 Paiement en attente :</strong> Il vous reste <strong>{{ booking.getRemainingBalance()|number_format(2, ',', ' ') }} €</strong> à régler.
+    </p>
+    <p style="text-align: center;">
+        <a href="{{ absolute_url(path('app_booking_cart')) }}" class="button">Effectuer le paiement</a>
+    </p>
+    {% endif %}
+
+    <p style="margin-top: 30px;">
+        Vous pouvez consulter le détail de votre réservation et télécharger vos billets en cliquant sur le lien ci-dessous.
+    </p>
+    
+    <p style="text-align: center;">
+        <a href="{{ absolute_url(path('app_booking_show', {id: booking.id})) }}" class="button">Voir ma réservation</a>
+    </p>
+
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+        Si vous avez des questions, n'hésitez pas à nous contacter.
+    </p>
+</div>
+{% endblock %}
+

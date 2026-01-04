@@ -46,6 +46,8 @@
             min-height: 100vh;
             line-height: 1.6;
             position: relative;
+            margin: 0;
+            padding: 0;
         }
 
         /* Arrière-plan avec images d'événements */
@@ -151,6 +153,10 @@
             gap: 8px;
             background: rgba(255, 255, 255, 0.9);
             border: 2px solid transparent;
+        }
+
+        .nav-link i {
+            font-size: 1rem;
         }
 
         .nav-link:hover {
@@ -373,6 +379,7 @@
         }
 
         /* Responsive */
+        /* Responsive */
         @media (max-width: 768px) {
             .nav-content {
                 flex-direction: column;
@@ -434,16 +441,19 @@
                         <a href="{{ path('app_booking_reservations') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_booking_reservations' %}active{% endif %}">
                             <i class="fas fa-ticket-alt"></i> Mes Réservations
                         </a>
+                        <a href="{{ path('app_booking_calendar') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_booking_calendar' %}active{% endif %}">
+                            <i class="fas fa-calendar-alt"></i> Calendrier
+                        </a>
                         <a href="{{ path('app_booking_cart') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_booking_cart' %}active{% endif %}">
                             <i class="fas fa-shopping-cart"></i> Panier
-                        </a>
-                        <a href="{{ path('app_booking_new') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_booking_new' %}active{% endif %}">
-                            <i class="fas fa-plus"></i> Nouvelle Réservation
                         </a>
                         <a href="{{ path('app_payment_index') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_payment_index' %}active{% endif %}">
                             <i class="fas fa-history"></i> Historique Paiements
                         </a>
                     {% endif %}
+                    <a href="{{ path('app_profile_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'app_profile' %}active{% endif %}">
+                        <i class="fas fa-user"></i> Mon Profil
+                    </a>
                     <a href="{{ path('app_logout') }}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i> Déconnexion
                     </a>
