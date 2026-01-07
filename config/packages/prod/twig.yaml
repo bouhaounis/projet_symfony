@@ -1,0 +1,6 @@
+# Configuration Twig pour la production
+twig:
+    # Activer le cache en production
+    cache: '%kernel.project_dir%/var/cache/twig'
+    strict_variables: false
+    auto_reload: false

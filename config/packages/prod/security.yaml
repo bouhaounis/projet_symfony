@@ -1,0 +1,6 @@
+# Configuration de sécurité pour la production
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: auto
+            cost: 12  # Plus élevé en production pour plus de sécurité

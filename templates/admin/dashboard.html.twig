@@ -492,17 +492,17 @@
                     </div>
                     <div class="action-label">Gérer les Utilisateurs</div>
                 </a>
-                <a href="{{ path('app_booking_index') }}" class="action-card">
+                <a href="{{ path('app_admin_bookings') }}" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-ticket-alt"></i>
                     </div>
-                    <div class="action-label">Voir les Réservations</div>
+                    <div class="action-label">Gérer les Réservations</div>
                 </a>
                 <a href="{{ path('app_payment_index') }}" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-credit-card"></i>
                     </div>
-                    <div class="action-label">Voir les Paiements</div>
+                    <div class="action-label">Paiements</div>
                 </a>
                 <a href="{{ path('app_category_index') }}" class="action-card">
                     <div class="action-icon">
@@ -515,6 +515,12 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <div class="action-label">Gérer les Lieux</div>
+                </a>
+                <a href="{{ path('app_admin_security_test') }}" class="action-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+                    <div class="action-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="action-label">Test de Sécurité</div>
                 </a>
             </div>
         </div>

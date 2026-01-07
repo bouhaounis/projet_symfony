@@ -14,6 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email;
 
 class RegistrationFormType extends AbstractType
 {
@@ -25,6 +26,14 @@ class RegistrationFormType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'placeholder' => 'votre@email.com'
+                ],
+                'constraints' => [
+                    new NotBlank(['message' => 'L\'email est obligatoire']),
+                    new Email(['message' => 'Veuillez entrer un email valide']),
+                    new Length([
+                        'max' => 180,
+                        'maxMessage' => 'L\'email ne peut pas dépasser {{ limit }} caractères'
+                    ])
                 ]
             ])
             ->add('plainPassword', RepeatedType::class, [

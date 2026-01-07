@@ -146,3 +146,4 @@
 2. 🟡 Moyenne : Calendrier, Favoris, Codes Promo
 3. 🟢 Basse : File d'attente, Reviews (peut être Phase 2)
 
+

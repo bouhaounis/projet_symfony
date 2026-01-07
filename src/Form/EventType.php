@@ -14,13 +14,16 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\Validator\Constraints\Url;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
-use Symfony\Component\Validator\Constraints\Url;
-use Symfony\Component\Validator\Constraints\Callback;
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
+use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class EventType extends AbstractType
 {
@@ -34,26 +37,48 @@ class EventType extends AbstractType
                     'placeholder' => 'Ex: Concert de Jazz'
                 ],
                 'constraints' => [
-                    new NotBlank(['message' => 'Le nom est obligatoire'])
+                    new NotBlank(['message' => 'Le nom est obligatoire']),
+                    new Length([
+                        'min' => 3,
+                        'max' => 255,
+                        'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères',
+                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères'
+                    ])
                 ]
             ])
-            ->add('image', UrlType::class, [
-                'label' => 'URL de l\'image',
+            ->add('imageFile', FileType::class, [
+                'label' => 'Uploader une image',
+                'mapped' => false,
+                'required' => false,
                 'attr' => [
-                    'class' => 'form-control',
-                    'placeholder' => 'https://example.com/image.jpg'
+                    'class' => 'file-input',
+                    'accept' => 'image/*',
+                    'id' => 'event_image_file'
                 ],
                 'constraints' => [
-                    new NotBlank(['message' => 'L\'URL de l\'image est obligatoire']),
-                    new Url(['message' => 'Veuillez entrer une URL valide']),
-                    new Callback([
-                        'callback' => function ($value, ExecutionContextInterface $context) {
-                            if ($value && !preg_match('/^https?:\/\//i', $value)) {
-                                $context->buildViolation('L\'URL doit commencer par http:// ou https://')
-                                    ->addViolation();
-                            }
-                        }
+                    new Image([
+                        'maxSize' => '5M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/gif',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPEG, PNG, GIF ou WebP)',
                     ])
+                ]
+            ])
+            ->add('imageUrl', UrlType::class, [
+                'label' => 'Ou utiliser une URL',
+                'mapped' => false,
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://example.com/image.jpg',
+                    'id' => 'event_image_url'
+                ],
+                'constraints' => [
+                    new Url(['message' => 'Veuillez entrer une URL valide'])
                 ]
             ])
             ->add('description', TextareaType::class, [
@@ -98,7 +123,11 @@ class EventType extends AbstractType
                     'placeholder' => 'Laisser vide pour utiliser la capacité du lieu'
                 ],
                 'constraints' => [
-                    new Positive(['message' => 'La capacité doit être positive'])
+                    new Positive(['message' => 'La capacité doit être positive']),
+                    new LessThanOrEqual([
+                        'value' => 100000,
+                        'message' => 'La capacité ne peut pas dépasser {{ compared_value }} places'
+                    ])
                 ]
             ])
             ->add('prix', MoneyType::class, [
@@ -111,7 +140,11 @@ class EventType extends AbstractType
                 ],
                 'constraints' => [
                     new NotBlank(['message' => 'Le prix est obligatoire']),
-                    new Positive(['message' => 'Le prix doit être positif'])
+                    new Positive(['message' => 'Le prix doit être positif']),
+                    new LessThanOrEqual([
+                        'value' => 10000,
+                        'message' => 'Le prix ne peut pas dépasser {{ compared_value }}€'
+                    ])
                 ]
             ])
             ->add('category', EntityType::class, [
@@ -130,6 +163,7 @@ class EventType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Event::class,
+            'is_edit' => false,
         ]);
     }
 }

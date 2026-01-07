@@ -101,6 +101,61 @@ class BookingRepository extends ServiceEntityRepository
         return $qb->orderBy('b.createdAt', 'DESC');
     }
 
+    /**
+     * Créer un QueryBuilder avec filtres pour l'admin (toutes les réservations)
+     */
+    public function createQueryBuilderForAdmin(
+        ?string $status = null,
+        ?\DateTimeInterface $dateFrom = null,
+        ?\DateTimeInterface $dateTo = null,
+        ?float $totalMin = null,
+        ?float $totalMax = null,
+        ?int $eventId = null,
+        ?int $userId = null
+    ) {
+        $qb = $this->createQueryBuilder('b')
+            ->leftJoin('b.event', 'e')
+            ->leftJoin('b.user', 'u')
+            ->select('b', 'e', 'u');
+
+        if ($status) {
+            $qb->andWhere('b.status = :status')
+               ->setParameter('status', $status);
+        }
+
+        if ($dateFrom) {
+            $qb->andWhere('b.createdAt >= :dateFrom')
+               ->setParameter('dateFrom', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $qb->andWhere('b.createdAt <= :dateTo')
+               ->setParameter('dateTo', $dateTo);
+        }
+
+        if ($totalMin !== null) {
+            $qb->andWhere('b.total >= :totalMin')
+               ->setParameter('totalMin', $totalMin);
+        }
+
+        if ($totalMax !== null) {
+            $qb->andWhere('b.total <= :totalMax')
+               ->setParameter('totalMax', $totalMax);
+        }
+
+        if ($eventId) {
+            $qb->andWhere('b.event = :eventId')
+               ->setParameter('eventId', $eventId);
+        }
+
+        if ($userId) {
+            $qb->andWhere('b.user = :userId')
+               ->setParameter('userId', $userId);
+        }
+
+        return $qb->orderBy('b.createdAt', 'DESC');
+    }
+
 //    /**
 //     * @return Booking[] Returns an array of Booking objects
 //     */

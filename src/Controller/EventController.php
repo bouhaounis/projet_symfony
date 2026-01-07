@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Event;
 use App\Form\EventType;
 use App\Repository\EventRepository;
+use App\Service\ImageUploadService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,13 +36,33 @@ class EventController extends AbstractController
     }
 
     #[Route('/new', name: 'app_event_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
         $event = new Event();
-        $form = $this->createForm(EventType::class, $event);
+        $form = $this->createForm(EventType::class, $event, ['is_edit' => false]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Gérer l'image : priorité à l'upload de fichier, sinon URL
+            $imageFile = $form->get('imageFile')->getData();
+            $imageUrl = $form->get('imageUrl')->getData();
+            
+            if ($imageFile) {
+                // Upload de fichier
+                $imageFileName = $imageUploadService->upload($imageFile);
+                $event->setImage($imageFileName);
+            } elseif ($imageUrl) {
+                // Utilisation de l'URL
+                $event->setImage($imageUrl);
+            } else {
+                // Validation : au moins un des deux doit être fourni
+                $this->addFlash('error', 'Veuillez soit uploader une image, soit fournir une URL d\'image.');
+                return $this->render('event/new.html.twig', [
+                    'event' => $event,
+                    'form' => $form->createView(),
+                ]);
+            }
+
             $entityManager->persist($event);
             $entityManager->flush();
 
@@ -64,12 +85,35 @@ class EventController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_event_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Event $event, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
-        $form = $this->createForm(EventType::class, $event);
+        $oldImage = $event->getImage();
+        $form = $this->createForm(EventType::class, $event, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Gérer l'image : priorité à l'upload de fichier, sinon URL, sinon garder l'ancienne
+            $imageFile = $form->get('imageFile')->getData();
+            $imageUrl = $form->get('imageUrl')->getData();
+            
+            if ($imageFile) {
+                // Upload de nouveau fichier
+                if ($oldImage && !str_starts_with($oldImage, 'http') && file_exists($imageUploadService->getTargetDirectory() . '/' . $oldImage)) {
+                    $imageUploadService->delete($oldImage);
+                }
+                $imageFileName = $imageUploadService->upload($imageFile);
+                $event->setImage($imageFileName);
+            } elseif ($imageUrl) {
+                // Utilisation de la nouvelle URL
+                if ($oldImage && !str_starts_with($oldImage, 'http') && file_exists($imageUploadService->getTargetDirectory() . '/' . $oldImage)) {
+                    $imageUploadService->delete($oldImage);
+                }
+                $event->setImage($imageUrl);
+            } else {
+                // Garder l'ancienne image si aucune nouvelle n'est fournie
+                $event->setImage($oldImage);
+            }
+
             $entityManager->flush();
 
             $this->addFlash('success', 'Événement modifié avec succès !');
@@ -83,9 +127,14 @@ class EventController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_event_delete', methods: ['POST'])]
-    public function delete(Request $request, Event $event, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Event $event, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
     {
         if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->request->get('_token'))) {
+            // Supprimer l'image associée
+            if ($event->getImage()) {
+                $imageUploadService->delete($event->getImage());
+            }
+            
             $entityManager->remove($event);
             $entityManager->flush();
 

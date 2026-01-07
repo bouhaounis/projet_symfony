@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Repository\BookingRepository;
+use App\Repository\EventRepository;
 use App\Repository\PaymentRepository;
 use App\Repository\UserRepository;
+use App\Service\SecurityTestService;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,6 +61,95 @@ class AdminController extends AbstractController
             'recentPayments' => $recentPayments,
             'recentUsers' => $recentUsers,
             'userSearch' => $userSearch,
+        ]);
+    }
+
+    #[Route('/bookings', name: 'app_admin_bookings', methods: ['GET'])]
+    public function bookings(
+        Request $request,
+        PaginatorInterface $paginator,
+        BookingRepository $bookingRepository,
+        EventRepository $eventRepository,
+        UserRepository $userRepository
+    ): Response {
+        // Récupérer les paramètres de filtres
+        $status = $request->query->get('status', '');
+        $dateFromParam = $request->query->get('dateFrom', '');
+        $dateToParam = $request->query->get('dateTo', '');
+        $totalMinParam = $request->query->get('totalMin', '');
+        $totalMaxParam = $request->query->get('totalMax', '');
+        $eventParam = $request->query->get('event', '');
+        $userParam = $request->query->get('user', '');
+
+        // Parse dates
+        $dateFrom = null;
+        if ($dateFromParam) {
+            try {
+                $dateFrom = new \DateTime($dateFromParam);
+            } catch (\Exception $e) {
+                $dateFrom = null;
+            }
+        }
+        
+        $dateTo = null;
+        if ($dateToParam) {
+            try {
+                $dateTo = new \DateTime($dateToParam);
+                $dateTo->setTime(23, 59, 59);
+            } catch (\Exception $e) {
+                $dateTo = null;
+            }
+        }
+
+        // Parse totals
+        $totalMin = !empty($totalMinParam) && is_numeric($totalMinParam) ? (float)$totalMinParam : null;
+        $totalMax = !empty($totalMaxParam) && is_numeric($totalMaxParam) ? (float)$totalMaxParam : null;
+        $eventId = !empty($eventParam) && is_numeric($eventParam) ? (int)$eventParam : null;
+        $userId = !empty($userParam) && is_numeric($userParam) ? (int)$userParam : null;
+
+        // Créer la requête avec filtres
+        $queryBuilder = $bookingRepository->createQueryBuilderForAdmin(
+            $status ?: null,
+            $dateFrom,
+            $dateTo,
+            $totalMin,
+            $totalMax,
+            $eventId,
+            $userId
+        );
+
+        // Paginer les résultats
+        $bookings = $paginator->paginate(
+            $queryBuilder->getQuery(),
+            $request->query->getInt('page', 1),
+            15 // 15 réservations par page
+        );
+
+        // Récupérer les événements et utilisateurs pour les filtres
+        $events = $eventRepository->findAll();
+        $users = $userRepository->findAll();
+
+        return $this->render('admin/bookings.html.twig', [
+            'bookings' => $bookings,
+            'events' => $events,
+            'users' => $users,
+            'currentStatus' => $status,
+            'currentDateFrom' => $dateFromParam,
+            'currentDateTo' => $dateToParam,
+            'currentTotalMin' => $totalMinParam,
+            'currentTotalMax' => $totalMaxParam,
+            'currentEvent' => $eventId,
+            'currentUser' => $userId,
+        ]);
+    }
+
+    #[Route('/security-test', name: 'app_admin_security_test', methods: ['GET'])]
+    public function securityTest(SecurityTestService $securityTestService): Response
+    {
+        $report = $securityTestService->runSecurityTests();
+
+        return $this->render('admin/security_test.html.twig', [
+            'report' => $report,
         ]);
     }
 }

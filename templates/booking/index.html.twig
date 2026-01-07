@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}📋 Mes Réservations{% endblock %}
+{% block title %}📋 {% if isAdmin|default(false) %}Toutes les Réservations{% else %}Mes Réservations{% endif %}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -479,7 +479,7 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">
-                        <i class="fas fa-ticket-alt"></i> Mes Réservations
+                        <i class="fas fa-ticket-alt"></i> {% if isAdmin|default(false) %}Toutes les Réservations{% else %}Mes Réservations{% endif %}
                     </h1>
                     <p style="color: #666; margin-top: 0.5rem;">Gérez toutes vos réservations en un seul endroit</p>
                 </div>
@@ -673,6 +673,15 @@
                                         </div>
                                     {% endif %}
                                 </div>
+                                {% if isAdmin|default(false) and booking.user %}
+                                    <div class="detail-item">
+                                        <div class="detail-label">Client</div>
+                                        <div class="detail-value">
+                                            <i class="fas fa-user" style="color: var(--primary);"></i>
+                                            {{ booking.user.email }}
+                                        </div>
+                                    </div>
+                                {% endif %}
                                 <div class="detail-item">
                                     <div class="detail-label">Événement</div>
                                     <div class="detail-value">

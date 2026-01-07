@@ -52,3 +52,4 @@ class BookingVoter extends Voter
     }
 }
 
+

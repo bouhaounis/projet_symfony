@@ -106,6 +106,8 @@ class BookingController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
+
         // Récupérer les paramètres de filtres
         $status = $request->query->get('status', '');
         $dateFromParam = $request->query->get('dateFrom', '');
@@ -139,16 +141,29 @@ class BookingController extends AbstractController
         $totalMax = !empty($totalMaxParam) && is_numeric($totalMaxParam) ? (float)$totalMaxParam : null;
         $eventId = !empty($eventParam) && is_numeric($eventParam) ? (int)$eventParam : null;
 
-        // Créer la requête avec filtres
-        $queryBuilder = $bookingRepository->createQueryBuilderWithFilters(
-            $user,
-            $status ?: null,
-            $dateFrom,
-            $dateTo,
-            $totalMin,
-            $totalMax,
-            $eventId
-        );
+        // Si admin, utiliser la méthode admin, sinon filtrer par utilisateur
+        if ($isAdmin) {
+            $queryBuilder = $bookingRepository->createQueryBuilderForAdmin(
+                $status ?: null,
+                $dateFrom,
+                $dateTo,
+                $totalMin,
+                $totalMax,
+                $eventId,
+                null // Tous les utilisateurs
+            );
+        } else {
+            // Créer la requête avec filtres pour l'utilisateur
+            $queryBuilder = $bookingRepository->createQueryBuilderWithFilters(
+                $user,
+                $status ?: null,
+                $dateFrom,
+                $dateTo,
+                $totalMin,
+                $totalMax,
+                $eventId
+            );
+        }
 
         // Paginer les résultats
         $bookings = $paginator->paginate(
@@ -169,6 +184,7 @@ class BookingController extends AbstractController
             'currentTotalMin' => $totalMinParam,
             'currentTotalMax' => $totalMaxParam,
             'currentEvent' => $eventId,
+            'isAdmin' => $isAdmin,
         ]);
     }
 

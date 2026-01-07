@@ -41,3 +41,4 @@ class ChangeEmailFormType extends AbstractType
     }
 }
 
+

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}💳 Mes Paiements{% endblock %}
+{% block title %}{% if isAdmin|default(false) %}💳 Paiements{% else %}💳 Mes Paiements{% endif %}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -354,7 +354,7 @@
             <div class="page-header">
                 <div>
                     <h1 class="page-title">
-                        <i class="fas fa-credit-card"></i> Mes Paiements
+                        <i class="fas fa-credit-card"></i> {% if isAdmin|default(false) %}Paiements{% else %}Mes Paiements{% endif %}
                     </h1>
                     <p style="color: #666; margin-top: 0.5rem;">Gérez tous vos paiements en un seul endroit</p>
                 </div>
@@ -411,6 +411,9 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                {% if isAdmin|default(false) %}
+                                    <th>Client</th>
+                                {% endif %}
                                 <th>Montant</th>
                                 <th>Méthode</th>
                                 <th>Statut</th>
@@ -425,6 +428,17 @@
                                     <td>
                                         <span class="payment-id">#{{ payment.id }}</span>
                                     </td>
+                                    {% if isAdmin|default(false) %}
+                                        <td>
+                                            {% if payment.booking and payment.booking.user %}
+                                                <span style="color: var(--primary); font-weight: 600;">
+                                                    <i class="fas fa-user"></i> {{ payment.booking.user.email }}
+                                                </span>
+                                            {% else %}
+                                                <span style="color: #999;">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
                                     <td>
                                         <span class="payment-amount">{{ payment.amount|number_format(2, ',', ' ') }} €</span>
                                     </td>

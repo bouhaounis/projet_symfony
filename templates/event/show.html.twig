@@ -186,7 +186,8 @@
         <div class="event-detail-container">
             <div class="event-detail-card">
                 {% if event.image and event.image|trim != '' %}
-                    <img src="{{ event.image }}" alt="{{ event.nom|e }}" class="event-image-large" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+                    <img src="{{ imageSrc }}" alt="{{ event.nom|e }}" class="event-image-large" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div class="event-image-placeholder-large" style="display: none;">
                         <i class="fas fa-calendar-alt"></i>
                     </div>

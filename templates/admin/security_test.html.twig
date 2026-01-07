@@ -1,0 +1,416 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}🔒 Test de Sécurité{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        .security-test-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .security-test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(67, 97, 238, 0.1);
+        }
+
+        .summary-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            background: var(--gray-50);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-success .stat-value {
+            color: var(--success);
+        }
+
+        .stat-danger .stat-value {
+            color: var(--danger);
+        }
+
+        .stat-warning .stat-value {
+            color: var(--warning);
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .test-card.success {
+            border-left-color: var(--success);
+        }
+
+        .test-card.failed {
+            border-left-color: var(--danger);
+        }
+
+        .test-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .test-card.error {
+            border-left-color: var(--danger);
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .test-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .test-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .test-status.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .test-status.failed {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .test-status.warning {
+            background: rgba(255, 158, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .test-status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .test-description {
+            color: var(--gray-600);
+            margin-bottom: 1.5rem;
+        }
+
+        .test-checks {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+
+        .check-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .check-icon.success {
+            color: var(--success);
+        }
+
+        .check-icon.failed {
+            color: var(--danger);
+        }
+
+        .check-icon.warning {
+            color: var(--warning);
+        }
+
+        .check-icon.error {
+            color: var(--danger);
+        }
+
+        .check-content {
+            flex: 1;
+        }
+
+        .check-name {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .check-message {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .refresh-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .timestamp {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="security-test-page">
+        <div class="security-test-container">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">
+                        <i class="fas fa-shield-alt"></i> Test de Sécurité
+                    </h1>
+                    <p class="page-subtitle">Rapport complet des mesures de sécurité</p>
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="{{ path('app_admin_security_test') }}" class="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </a>
+                    <a href="{{ path('app_admin_dashboard') }}" class="back-btn">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- Résumé -->
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h2 class="summary-title">
+                        <i class="fas fa-chart-bar"></i> Résumé
+                    </h2>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ report.summary.total }}</div>
+                        <div class="stat-label">Tests Totaux</div>
+                    </div>
+                    <div class="stat-item stat-success">
+                        <div class="stat-value">{{ report.summary.passed }}</div>
+                        <div class="stat-label">Réussis</div>
+                    </div>
+                    <div class="stat-item stat-danger">
+                        <div class="stat-value">{{ report.summary.failed }}</div>
+                        <div class="stat-label">Échecs</div>
+                    </div>
+                    <div class="stat-item stat-warning">
+                        <div class="stat-value">{{ report.summary.warnings }}</div>
+                        <div class="stat-label">Avertissements</div>
+                    </div>
+                </div>
+                <div class="timestamp">
+                    <i class="far fa-clock"></i> Dernière exécution: {{ report.timestamp|date('d/m/Y H:i:s') }}
+                </div>
+            </div>
+
+            <!-- Tests détaillés -->
+            {% for testKey, test in report.tests %}
+                <div class="test-card {{ test.status }}">
+                    <div class="test-header">
+                        <h3 class="test-name">
+                            {% if test.status == 'success' %}
+                                <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                            {% elseif test.status == 'failed' %}
+                                <i class="fas fa-times-circle" style="color: var(--danger);"></i>
+                            {% elseif test.status == 'warning' %}
+                                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+                            {% else %}
+                                <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+                            {% endif %}
+                            {{ test.name }}
+                        </h3>
+                        <span class="test-status {{ test.status }}">
+                            {{ test.status|upper }}
+                        </span>
+                    </div>
+                    <p class="test-description">{{ test.description }}</p>
+                    
+                    {% if test.checks|length > 0 %}
+                        <div class="test-checks">
+                            {% for check in test.checks %}
+                                <div class="check-item">
+                                    <span class="check-icon {{ check.status }}">
+                                        {% if check.status == 'success' %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% elseif check.status == 'failed' %}
+                                            <i class="fas fa-times-circle"></i>
+                                        {% elseif check.status == 'warning' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% else %}
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        {% endif %}
+                                    </span>
+                                    <div class="check-content">
+                                        <div class="check-name">{{ check.name }}</div>
+                                        <div class="check-message">{{ check.message }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

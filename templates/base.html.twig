@@ -379,7 +379,16 @@
         }
 
         /* Responsive */
-        /* Responsive */
+        @media (max-width: 1024px) {
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .joyful-title {
+                font-size: 2.2rem;
+            }
+        }
+
         @media (max-width: 768px) {
             .nav-content {
                 flex-direction: column;
@@ -389,6 +398,12 @@
             .nav-links {
                 flex-wrap: wrap;
                 justify-content: center;
+                gap: 0.75rem;
+            }
+            
+            .nav-link {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
             }
 
             .joyful-title {
@@ -398,11 +413,39 @@
             .main-header h1 {
                 font-size: 2.5rem;
             }
+            
+            .main-header p {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
 
             .flash-messages {
                 left: 20px;
                 right: 20px;
                 max-width: none;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .nav-brand {
+                font-size: 1.5rem;
+            }
+            
+            .joyful-title {
+                font-size: 1.75rem;
+            }
+            
+            .main-header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-link {
+                padding: 0.35rem 0.7rem;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -437,6 +480,9 @@
                         <a href="{{ path('app_user_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'app_user' %}active{% endif %}">
                             <i class="fas fa-users"></i> Utilisateurs
                         </a>
+                        <a href="{{ path('app_payment_index') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_payment_index' %}active{% endif %}">
+                            <i class="fas fa-credit-card"></i> Paiements
+                        </a>
                     {% else %}
                         <a href="{{ path('app_booking_reservations') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_booking_reservations' %}active{% endif %}">
                             <i class="fas fa-ticket-alt"></i> Mes Réservations
@@ -448,12 +494,12 @@
                             <i class="fas fa-shopping-cart"></i> Panier
                         </a>
                         <a href="{{ path('app_payment_index') }}" class="nav-link {% if app.request.attributes.get('_route') == 'app_payment_index' %}active{% endif %}">
-                            <i class="fas fa-history"></i> Historique Paiements
+                            <i class="fas fa-credit-card"></i> Paiements
+                        </a>
+                        <a href="{{ path('app_profile_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'app_profile' %}active{% endif %}">
+                            <i class="fas fa-user"></i> Mon Profil
                         </a>
                     {% endif %}
-                    <a href="{{ path('app_profile_index') }}" class="nav-link {% if app.request.attributes.get('_route') starts with 'app_profile' %}active{% endif %}">
-                        <i class="fas fa-user"></i> Mon Profil
-                    </a>
                     <a href="{{ path('app_logout') }}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i> Déconnexion
                     </a>

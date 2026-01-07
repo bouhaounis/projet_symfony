@@ -24,12 +24,19 @@ class PaymentController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // Filtrer les paiements par utilisateur connecté
+        // Si admin, afficher tous les paiements, sinon seulement ceux de l'utilisateur
         $queryBuilder = $paymentRepository->createQueryBuilder('p')
             ->join('p.booking', 'b')
-            ->where('b.user = :user')
-            ->setParameter('user', $user)
-            ->orderBy('p.createdAt', 'DESC');
+            ->leftJoin('b.user', 'u')
+            ->select('p', 'b', 'u');
+
+        // Filtrer par utilisateur seulement si ce n'est pas un admin
+        if (!in_array('ROLE_ADMIN', $user->getRoles())) {
+            $queryBuilder->where('b.user = :user')
+                ->setParameter('user', $user);
+        }
+
+        $queryBuilder->orderBy('p.createdAt', 'DESC');
 
         $payments = $paginator->paginate(
             $queryBuilder->getQuery(),
@@ -37,8 +44,11 @@ class PaymentController extends AbstractController
             15 // 15 paiements par page
         );
 
+        $isAdmin = in_array('ROLE_ADMIN', $user->getRoles());
+
         return $this->render('payment/index.html.twig', [
             'payments' => $payments,
+            'isAdmin' => $isAdmin,
         ]);
     }
 

@@ -326,7 +326,8 @@
                     {% for event in eventsItems %}
                         <div class="event-card">
                             {% if event.image and event.image|trim != '' %}
-                                <img src="{{ event.image }}" alt="{{ event.nom|e }}" class="event-image" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+                                <img src="{{ imageSrc }}" alt="{{ event.nom|e }}" class="event-image" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="event-image-placeholder" style="display: none;">
                                     <i class="fas fa-calendar-alt"></i>
                                 </div>

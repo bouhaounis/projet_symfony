@@ -98,6 +98,98 @@
             min-height: 100px;
         }
 
+        .image-choice-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .image-choice-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-600);
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .image-choice-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .image-choice-tab:hover {
+            color: var(--primary);
+        }
+
+        .image-option {
+            display: none;
+        }
+
+        .image-option.active {
+            display: block;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .file-input-label {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--gray-50);
+            border: 2px dashed var(--gray-200);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .file-input-label:hover {
+            background: rgba(67, 97, 238, 0.05);
+            border-color: var(--primary);
+        }
+
+        .file-input-label .file-name {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .file-input-label .file-button {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover .file-button {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
         .btn-submit {
             width: 100%;
             background: var(--gradient-primary);
@@ -162,30 +254,66 @@
         }
     </style>
     <script>
-        function previewImage(url) {
+        function switchImageOption(option) {
+            document.querySelectorAll('.image-choice-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.image-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-option="${option}"]`).classList.add('active');
+            document.getElementById(`image-option-${option}`).classList.add('active');
+            
+            // Réinitialiser les champs
+            if (option === 'upload') {
+                document.getElementById('event_image_url').value = '';
+            } else {
+                document.getElementById('event_image_file').value = '';
+            }
+        }
+
+        function previewImageFile(input) {
+            const previewDiv = document.getElementById('image-preview');
+            const previewImg = document.getElementById('preview-img');
+            const fileName = document.querySelector('.file-name');
+            
+            if (input.files && input.files[0]) {
+                fileName.textContent = input.files[0].name;
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewDiv.style.display = 'block';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                fileName.textContent = 'Aucun fichier sélectionné';
+            }
+        }
+
+        function previewImageUrl(input) {
             const previewDiv = document.getElementById('image-preview');
             const previewImg = document.getElementById('preview-img');
             
-            if (url && url.trim() !== '') {
-                previewImg.src = url;
+            if (input.value && input.value.trim() !== '') {
+                previewImg.src = input.value;
                 previewDiv.style.display = 'block';
                 previewImg.onerror = function() {
                     previewDiv.innerHTML = '<div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); color: #ef4444; border-radius: 8px; border-left: 3px solid #ef4444;"><i class="fas fa-exclamation-triangle"></i> Impossible de charger l\'image. Vérifiez que l\'URL est correcte.</div>';
                 };
                 previewImg.onload = function() {
-                    previewDiv.innerHTML = '<label class="form-label">Aperçu:</label><img id="preview-img" src="' + url + '" alt="Aperçu" style="max-width: 100%; max-height: 200px; border-radius: 12px; border: 2px solid var(--gray-200);">';
+                    previewDiv.innerHTML = '<label class="form-label">Nouvel aperçu:</label><img id="preview-img" src="' + input.value + '" alt="Aperçu" style="max-width: 100%; max-height: 200px; border-radius: 12px; border: 2px solid var(--gray-200);">';
                 };
             } else {
                 previewDiv.style.display = 'none';
             }
         }
-        
-        // Initialiser l'aperçu avec l'image existante
+
         document.addEventListener('DOMContentLoaded', function() {
-            const imageInput = document.getElementById('event_image_url');
-            if (imageInput && imageInput.value) {
-                previewImage(imageInput.value);
-            }
+            // Initialiser avec l'option upload par défaut
+            switchImageOption('upload');
         });
     </script>
 {% endblock %}
@@ -205,15 +333,60 @@
                     }) }}
 
                     <div class="form-group">
-                        {{ form_label(form.image, 'URL de l\'image', {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(form.image, {'attr': {'class': 'form-control', 'id': 'event_image_url', 'oninput': 'previewImage(this.value)'}}) }}
-                        {{ form_errors(form.image) }}
-                        <small style="color: var(--gray-600); margin-top: 0.5rem; display: block;">
-                            <i class="fas fa-info-circle"></i> Entrez une URL complète (ex: https://example.com/image.jpg)
-                        </small>
-                        <div id="image-preview" style="margin-top: 1rem; {% if event.image %}display: block;{% else %}display: none;{% endif %}">
-                            <label class="form-label">Aperçu:</label>
-                            <img id="preview-img" src="{% if event.image %}{{ event.image }}{% endif %}" alt="Aperçu" style="max-width: 100%; max-height: 200px; border-radius: 12px; border: 2px solid var(--gray-200);">
+                        <label class="form-label">Image de l'événement</label>
+                        
+                        {% if event.image %}
+                            {% set imageSrc = (event.image starts with 'http') ? event.image : app.request.basePath ~ '/uploads/events/' ~ event.image %}
+                            <div style="margin-bottom: 1rem; padding: 1rem; background: var(--gray-50); border-radius: 12px;">
+                                <label class="form-label" style="margin-bottom: 0.5rem;">Image actuelle:</label>
+                                <img src="{{ imageSrc }}" alt="Image actuelle" style="max-width: 100%; max-height: 200px; border-radius: 12px; border: 2px solid var(--gray-200);">
+                                <small style="color: var(--gray-600); margin-top: 0.5rem; display: block;">
+                                    <i class="fas fa-info-circle"></i> Laissez vide pour conserver cette image
+                                </small>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Onglets de choix -->
+                        <div class="image-choice-tabs">
+                            <button type="button" class="image-choice-tab active" data-option="upload" onclick="switchImageOption('upload')">
+                                <i class="fas fa-upload"></i> Uploader un fichier
+                            </button>
+                            <button type="button" class="image-choice-tab" data-option="url" onclick="switchImageOption('url')">
+                                <i class="fas fa-link"></i> Utiliser une URL
+                            </button>
+                        </div>
+
+                        <!-- Option Upload -->
+                        <div id="image-option-upload" class="image-option active">
+                            <div class="file-input-wrapper">
+                                {{ form_widget(form.imageFile, {'attr': {'class': 'file-input', 'id': 'event_image_file', 'accept': 'image/*', 'onchange': 'previewImageFile(this)'}}) }}
+                                <label for="event_image_file" class="file-input-label" onclick="document.getElementById('event_image_file').click(); return false;">
+                                    <span class="file-name">Aucun fichier sélectionné</span>
+                                    <span class="file-button">
+                                        <i class="fas fa-folder-open"></i> Choisir un fichier
+                                    </span>
+                                </label>
+                            </div>
+                            {{ form_errors(form.imageFile) }}
+                            <small style="color: var(--gray-600); margin-top: 0.5rem; display: block;">
+                                <i class="fas fa-info-circle"></i> Formats acceptés: JPEG, PNG, GIF, WebP (max 5MB)
+                            </small>
+                        </div>
+
+                        <!-- Option URL -->
+                        <div id="image-option-url" class="image-option">
+                            {{ form_label(form.imageUrl, false, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control', 'id': 'event_image_url', 'placeholder': 'https://example.com/image.jpg', 'oninput': 'previewImageUrl(this)'}}) }}
+                            {{ form_errors(form.imageUrl) }}
+                            <small style="color: var(--gray-600); margin-top: 0.5rem; display: block;">
+                                <i class="fas fa-info-circle"></i> Entrez une URL complète (ex: https://example.com/image.jpg)
+                            </small>
+                        </div>
+
+                        <!-- Aperçu -->
+                        <div id="image-preview" style="margin-top: 1rem; display: none;">
+                            <label class="form-label">Nouvel aperçu:</label>
+                            <img id="preview-img" src="" alt="Aperçu" style="max-width: 100%; max-height: 200px; border-radius: 12px; border: 2px solid var(--gray-200);">
                         </div>
                     </div>
 

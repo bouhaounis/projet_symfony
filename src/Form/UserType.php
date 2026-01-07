@@ -13,6 +13,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email;
 
 class UserType extends AbstractType
 {
@@ -23,6 +24,14 @@ class UserType extends AbstractType
                 'label' => 'Email',
                 'attr' => [
                     'class' => 'form-control'
+                ],
+                'constraints' => [
+                    new NotBlank(['message' => 'L\'email est obligatoire']),
+                    new Email(['message' => 'Veuillez entrer un email valide']),
+                    new Length([
+                        'max' => 180,
+                        'maxMessage' => 'L\'email ne peut pas dépasser {{ limit }} caractères'
+                    ])
                 ]
             ])
             ->add('plainPassword', RepeatedType::class, [

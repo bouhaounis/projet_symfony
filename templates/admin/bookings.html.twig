@@ -1,0 +1,352 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}📋 Gestion des Réservations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .main-header,
+        .featured-events {
+            display: none !important;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #ff9e00;
+            --gray-50: #f9fafb;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+        }
+
+        .admin-bookings-page {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .filters-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        }
+
+        .btn-filter {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .bookings-table {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: rgba(255, 158, 0, 0.1);
+            color: var(--warning);
+        }
+
+        .status-confirmed {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+
+        .status-cancelled {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+        }
+
+        .btn-view:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--primary);
+            background: white;
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .pagination a:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination .current {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="admin-bookings-page">
+        <div class="admin-container">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-ticket-alt"></i> Gestion des Réservations
+                </h1>
+                <p style="color: var(--gray-600);">Gérez toutes les réservations du système</p>
+            </div>
+
+            <!-- Filtres -->
+            <div class="filters-card">
+                <form method="GET" action="{{ path('app_admin_bookings') }}">
+                    <div class="filters-grid">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Statut</label>
+                            <select name="status" class="form-control">
+                                <option value="">Tous les statuts</option>
+                                <option value="pending" {{ currentStatus == 'pending' ? 'selected' : '' }}>En attente</option>
+                                <option value="confirmed" {{ currentStatus == 'confirmed' ? 'selected' : '' }}>Confirmée</option>
+                                <option value="cancelled" {{ currentStatus == 'cancelled' ? 'selected' : '' }}>Annulée</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Date début</label>
+                            <input type="date" name="dateFrom" value="{{ currentDateFrom }}" class="form-control">
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Date fin</label>
+                            <input type="date" name="dateTo" value="{{ currentDateTo }}" class="form-control">
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Montant min (€)</label>
+                            <input type="number" name="totalMin" value="{{ currentTotalMin }}" step="0.01" class="form-control">
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Montant max (€)</label>
+                            <input type="number" name="totalMax" value="{{ currentTotalMax }}" step="0.01" class="form-control">
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Événement</label>
+                            <select name="event" class="form-control">
+                                <option value="">Tous les événements</option>
+                                {% for event in events %}
+                                    <option value="{{ event.id }}" {{ currentEvent == event.id ? 'selected' : '' }}>
+                                        {{ event.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--gray-800);">Client</label>
+                            <select name="user" class="form-control">
+                                <option value="">Tous les clients</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}" {{ currentUser == user.id ? 'selected' : '' }}>
+                                        {{ user.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="submit" class="btn-filter">
+                            <i class="fas fa-filter"></i> Filtrer
+                        </button>
+                        <a href="{{ path('app_admin_bookings') }}" style="background: var(--gray-200); color: var(--gray-800); border: none; border-radius: 8px; padding: 0.75rem 2rem; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.3s ease;">
+                            <i class="fas fa-times"></i> Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tableau des réservations -->
+            <div class="bookings-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Événement</th>
+                            <th>Quantité</th>
+                            <th>Total</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if bookings|length > 0 %}
+                            {% for booking in bookings %}
+                                <tr>
+                                    <td><strong>#{{ booking.id }}</strong></td>
+                                    <td>{{ booking.user.email }}</td>
+                                    <td>{{ booking.event.nom }}</td>
+                                    <td>{{ booking.quantity }}</td>
+                                    <td><strong>{{ booking.total|number_format(2, ',', ' ') }} €</strong></td>
+                                    <td>
+                                        <span class="status-badge status-{{ booking.status }}">
+                                            {% if booking.status == 'pending' %}
+                                                En attente
+                                            {% elseif booking.status == 'confirmed' %}
+                                                Confirmée
+                                            {% else %}
+                                                Annulée
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ booking.createdAt|date('d/m/Y H:i') }}</td>
+                                    <td>
+                                        <a href="{{ path('app_booking_show', {'id': booking.id}) }}" class="btn-action btn-view">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 3rem; color: var(--gray-600);">
+                                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: var(--gray-200);"></i>
+                                    Aucune réservation trouvée
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if bookings|length > 0 %}
+                <div class="pagination">
+                    {{ knp_pagination_render(bookings) }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

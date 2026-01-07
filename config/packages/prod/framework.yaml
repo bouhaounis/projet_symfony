@@ -1,0 +1,12 @@
+# Configuration framework pour la production
+framework:
+    # Désactiver le profiler en production
+    profiler:
+        enabled: false
+    
+    # Optimiser le cache
+    cache:
+        pools:
+            cache.app:
+                adapter: cache.adapter.filesystem
+                default_lifetime: 31536000  # 1 an

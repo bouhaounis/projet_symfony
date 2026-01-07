@@ -21,3 +21,7 @@ services:
 
     App\Service\EmailNotificationService:
         arguments: []
+
+    App\Service\ImageUploadService:
+        arguments:
+            $targetDirectory: '%kernel.project_dir%/public/uploads/events'
